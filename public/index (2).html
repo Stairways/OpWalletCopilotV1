@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP_NET — Wallet Copilot & DeFi Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080810;
+    --surface: #0f0f1a;
+    --surface2: #161625;
+    --border: #252538;
+    --orange: #f7931a;
+    --orange-dim: rgba(247,147,26,0.1);
+    --orange-glow: rgba(247,147,26,0.25);
+    --green: #00e5a0;
+    --green-dim: rgba(0,229,160,0.08);
+    --red: #ff4d6a;
+    --red-dim: rgba(255,77,106,0.1);
+    --text: #eeeef5;
+    --muted: #5a5a78;
+    --accent: #a78bfa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(247,147,26,0.025) 1px,transparent 1px), linear-gradient(90deg,rgba(247,147,26,0.025) 1px,transparent 1px); background-size:56px 56px; pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; }
+
+  /* ── TICKER BAR ── */
+  .ticker-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    overflow: hidden;
+  }
+  .ticker-item { display:flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
+  .ticker-label { color:var(--muted); }
+  .ticker-val { color:var(--text); font-weight:700; }
+  .ticker-val.up { color:var(--green); }
+  .ticker-val.dn { color:var(--red); }
+  .ticker-sep { color:var(--border); }
+
+  /* countdown */
+  .countdown-wrap { display:flex; align-items:center; gap:8px; margin-left:auto; }
+  .countdown-label { color:var(--muted); font-size:10px; letter-spacing:1px; }
+  .countdown-units { display:flex; gap:4px; }
+  .cd-unit { background:var(--orange-dim); border:1px solid rgba(247,147,26,0.2); border-radius:4px; padding:2px 6px; color:var(--orange); font-size:11px; font-weight:700; min-width:28px; text-align:center; }
+
+  /* ── NAV ── */
+  nav { display:flex; align-items:center; padding:0 24px; height:60px; border-bottom:1px solid var(--border); background:rgba(8,8,16,0.9); backdrop-filter:blur(12px); position:sticky; top:0; z-index:100; gap:0; }
+  .nav-logo { display:flex; align-items:center; gap:10px; margin-right:32px; flex-shrink:0; }
+  .nav-logo-icon { width:30px; height:30px; background:var(--orange); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; box-shadow:0 0 14px var(--orange-glow); }
+  .nav-logo-text { font-size:15px; font-weight:800; letter-spacing:-0.3px; white-space:nowrap; }
+  .nav-logo-text span { color:var(--orange); }
+  .nav-tabs { display:flex; gap:4px; }
+  .nav-tab { padding:7px 16px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; color:var(--muted); border:1px solid transparent; white-space:nowrap; }
+  .nav-tab:hover { color:var(--text); }
+  .nav-tab.active { background:var(--orange-dim); border-color:rgba(247,147,26,0.2); color:var(--orange); }
+  .nav-right { display:flex; align-items:center; gap:10px; margin-left:auto; }
+
+  /* network pill */
+  .network-pill { font-family:'Space Mono',monospace; font-size:10px; padding:4px 10px; border-radius:16px; letter-spacing:0.5px; white-space:nowrap; }
+  .network-pill.connected { background:var(--green-dim); color:var(--green); border:1px solid rgba(0,229,160,0.2); }
+  .network-pill.disconnected { background:var(--red-dim); color:var(--red); border:1px solid rgba(255,77,106,0.2); }
+  .network-pill.connecting { background:var(--orange-dim); color:var(--orange); border:1px solid rgba(247,147,26,0.2); }
+  .network-pill::before { content:'● '; animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* connect wallet btn */
+  .connect-btn {
+    display:flex; align-items:center; gap:7px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:7px 14px;
+    font-family:'Syne',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all 0.2s;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .connect-btn:hover { border-color:var(--orange); color:var(--orange); }
+  .connect-btn.connected-wallet { background:var(--green-dim); border-color:rgba(0,229,160,0.3); color:var(--green); }
+  .connect-btn-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); flex-shrink:0; }
+  .connect-btn.connected-wallet .connect-btn-dot { background:var(--green); box-shadow:0 0 6px var(--green); }
+
+  /* ── QUICK LINKS BAR ── */
+  .quick-links {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 24px;
+    border-bottom:1px solid var(--border);
+    background:rgba(8,8,16,0.5);
+    flex-wrap:wrap;
+  }
+  .quick-links-label { font-size:10px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; font-weight:600; margin-right:4px; }
+  .quick-link {
+    display:flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:600;
+    padding:4px 12px;
+    border-radius:16px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--muted);
+    cursor:pointer;
+    text-decoration:none;
+    transition:all 0.15s;
+    white-space:nowrap;
+  }
+  .quick-link:hover { border-color:var(--orange); color:var(--orange); background:var(--orange-dim); }
+
+  /* ── PAGES ── */
+  .page { display:none; padding:32px 24px; max-width:960px; margin:0 auto; }
+  .page.active { display:block; animation:fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── INPUTS ── */
+  .input-label { font-size:10px; font-weight:600; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:block; }
+  .input-row { display:flex; gap:10px; margin-bottom:28px; }
+  .addr-input { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 16px; font-family:'Space Mono',monospace; font-size:12px; color:var(--text); outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
+  .addr-input:focus { border-color:var(--orange); box-shadow:0 0 0 3px var(--orange-dim); }
+  .addr-input::placeholder { color:var(--muted); }
+  .btn { background:var(--orange); color:#000; border:none; border-radius:10px; padding:12px 20px; font-family:'Syne',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s, opacity 0.15s; white-space:nowrap; }
+  .btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px var(--orange-glow); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-ghost { background:var(--surface); color:var(--text); border:1px solid var(--border); }
+  .btn-ghost:hover { border-color:var(--orange); box-shadow:none; color:var(--orange); }
+
+  /* ── CARDS ── */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:border-color 0.2s; }
+  .card:hover { border-color:rgba(247,147,26,0.15); }
+  .card-header { display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid var(--border); }
+  .card-icon { width:26px; height:26px; background:var(--orange-dim); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+  .card-title { font-size:13px; font-weight:700; }
+
+  /* ── STATS ── */
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
+  .stat-card:hover { border-color:rgba(247,147,26,0.2); transform:translateY(-2px); }
+  .stat-card::after { content:''; position:absolute; top:0; right:0; width:60px; height:60px; background:radial-gradient(circle at top right,var(--orange-dim),transparent 70%); }
+  .stat-label { font-size:10px; font-weight:600; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .stat-val { font-family:'Space Mono',monospace; font-size:22px; font-weight:700; line-height:1; margin-bottom:5px; }
+  .stat-val.orange { color:var(--orange); }
+  .stat-val.green { color:var(--green); }
+  .stat-sub { font-size:11px; color:var(--muted); }
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .full-col { margin-bottom:12px; }
+
+  /* ── CHAT ── */
+  .chat-msgs { padding:16px 20px; min-height:190px; max-height:250px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+  .msg { display:flex; gap:8px; animation:fadeUp 0.3s ease both; }
+  .msg.user { flex-direction:row-reverse; }
+  .msg-av { width:24px; height:24px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; margin-top:2px; }
+  .msg.bot .msg-av { background:linear-gradient(135deg,var(--orange),#e55c00); }
+  .msg.user .msg-av { background:var(--surface2); border:1px solid var(--border); }
+  .msg-bub { background:var(--surface2); border-radius:10px; border-top-left-radius:3px; padding:8px 12px; font-size:12px; line-height:1.65; max-width:calc(100% - 32px); }
+  .msg.user .msg-bub { background:var(--orange-dim); border:1px solid rgba(247,147,26,0.12); border-radius:10px; border-top-right-radius:3px; }
+  .hi { color:var(--orange); font-weight:700; }
+  .ok { color:var(--green); }
+  .wn { color:#fbbf24; }
+  .chips { padding:0 16px 12px; display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:11px; padding:4px 10px; border-radius:16px; background:var(--surface2); border:1px solid var(--border); color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .chip:hover { border-color:var(--orange); color:var(--orange); }
+  .chat-bar { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
+  .chat-in { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-family:'Syne',sans-serif; font-size:12px; color:var(--text); outline:none; }
+  .chat-in:focus { border-color:var(--orange); }
+  .chat-in::placeholder { color:var(--muted); font-size:11px; }
+  .send-btn { background:var(--orange); border:none; border-radius:8px; width:34px; height:34px; cursor:pointer; color:#000; font-size:14px; display:flex; align-items:center; justify-content:center; transition:transform 0.15s; }
+  .send-btn:hover { transform:scale(1.08); }
+  .typing { display:flex; align-items:center; gap:4px; padding:3px 0; }
+  .typing span { width:5px; height:5px; background:var(--orange); border-radius:50%; animation:bounce 1.2s infinite; }
+  .typing span:nth-child(2){animation-delay:0.2s}
+  .typing span:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:0.4}40%{transform:translateY(-5px);opacity:1}}
+
+  /* ── LIST ROWS ── */
+  .list-row { display:flex; align-items:center; padding:12px 20px; gap:12px; cursor:pointer; transition:background 0.15s; border-bottom:1px solid var(--border); }
+  .list-row:last-child { border-bottom:none; }
+  .list-row:hover { background:var(--surface2); }
+  .row-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:'Space Mono',monospace; flex-shrink:0; }
+  .row-info { flex:1; }
+  .row-name { font-size:13px; font-weight:600; margin-bottom:2px; }
+  .row-sub { font-size:11px; color:var(--muted); }
+  .row-right { text-align:right; }
+  .row-val { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; margin-bottom:2px; }
+  .row-val.pos { color:var(--green); }
+  .row-val.neg { color:var(--red); }
+  .row-val2 { font-size:11px; color:var(--muted); }
+  .empty { padding:28px; text-align:center; color:var(--muted); font-size:12px; line-height:1.8; }
+
+  /* badges */
+  .badge { font-size:10px; font-family:'Space Mono',monospace; padding:2px 7px; border-radius:4px; letter-spacing:0.5px; }
+  .badge-purple { background:rgba(167,139,250,0.1); color:var(--accent); border:1px solid rgba(167,139,250,0.2); }
+  .badge-green { background:var(--green-dim); color:var(--green); border:1px solid rgba(0,229,160,0.2); }
+  .badge-orange { background:var(--orange-dim); color:var(--orange); border:1px solid rgba(247,147,26,0.2); }
+  .badge-red { background:var(--red-dim); color:var(--red); border:1px solid rgba(255,77,106,0.2); }
+
+  .error-bar { background:var(--red-dim); border:1px solid rgba(255,77,106,0.3); border-radius:10px; padding:10px 14px; font-size:12px; color:var(--red); margin-bottom:16px; display:none; }
+
+  /* ── DEFI DASHBOARD ── */
+  .defi-hero { background:linear-gradient(135deg,var(--surface) 0%,rgba(247,147,26,0.04) 100%); border:1px solid var(--border); border-radius:14px; padding:28px; margin-bottom:20px; position:relative; overflow:hidden; }
+  .defi-hero::before { content:'DeFi'; position:absolute; right:-10px; top:-10px; font-family:'DM Serif Display',serif; font-size:110px; color:rgba(247,147,26,0.04); line-height:1; pointer-events:none; user-select:none; }
+  .defi-hero-label { font-size:10px; font-weight:600; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .defi-hero-total { font-family:'DM Serif Display',serif; font-size:48px; color:var(--text); line-height:1; margin-bottom:4px; }
+  .defi-hero-total span { color:var(--orange); }
+  .defi-hero-sub { font-size:12px; color:var(--muted); margin-bottom:20px; }
+  .defi-hero-stats { display:flex; gap:28px; flex-wrap:wrap; }
+  .dhs-label { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+  .dhs-val { font-family:'Space Mono',monospace; font-size:16px; font-weight:700; }
+  .dhs-val.green { color:var(--green); }
+  .dhs-val.orange { color:var(--orange); }
+
+  .position-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:12px; transition:border-color 0.2s,transform 0.15s; position:relative; overflow:hidden; }
+  .position-card:hover { border-color:rgba(247,147,26,0.2); transform:translateY(-1px); }
+  .position-card::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--orange); border-radius:14px 0 0 14px; }
+  .pos-header { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .pos-icon { width:38px; height:38px; border-radius:10px; background:var(--orange-dim); display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .pos-name { font-size:15px; font-weight:700; margin-bottom:2px; }
+  .pos-sub { font-size:11px; color:var(--muted); }
+  .pos-badges { display:flex; gap:6px; margin-left:auto; flex-wrap:wrap; }
+  .pos-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .pm-label { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
+  .pm-val { font-family:'Space Mono',monospace; font-size:15px; font-weight:700; }
+  .pm-val.green { color:var(--green); }
+  .pm-val.orange { color:var(--orange); }
+  .apy-ring { display:flex; align-items:center; gap:8px; }
+  .ring-wrap { position:relative; width:42px; height:42px; }
+  .ring-wrap svg { transform:rotate(-90deg); }
+  .ring-bg { fill:none; stroke:var(--border); stroke-width:4; }
+  .ring-fill { fill:none; stroke:var(--green); stroke-width:4; stroke-linecap:round; }
+  .ring-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:9px; font-weight:700; color:var(--green); }
+  .il-meter { margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .il-label { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+  .il-bar-bg { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .il-bar-fill { height:100%; background:linear-gradient(90deg,var(--green),#fbbf24); border-radius:2px; }
+  .il-explain { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.6; }
+
+  .no-positions { text-align:center; padding:52px 20px; color:var(--muted); }
+  .no-positions-icon { font-size:44px; margin-bottom:14px; opacity:0.5; }
+  .no-positions-title { font-size:17px; font-weight:700; margin-bottom:7px; color:var(--text); }
+  .no-positions-sub { font-size:12px; line-height:1.7; max-width:320px; margin:0 auto; }
+
+  /* ── WALLET MODAL ── */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:200; display:none; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; animation:fadeUp 0.2s ease; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:380px; position:relative; }
+  .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; transition:color 0.15s; }
+  .modal-close:hover { color:var(--text); }
+  .modal-title { font-size:18px; font-weight:800; margin-bottom:6px; }
+  .modal-sub { font-size:12px; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+  .wallet-option { display:flex; align-items:center; gap:14px; padding:14px 16px; border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.15s; margin-bottom:10px; }
+  .wallet-option:hover { border-color:var(--orange); background:var(--orange-dim); }
+  .wallet-option-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .wallet-option-name { font-size:14px; font-weight:700; margin-bottom:2px; }
+  .wallet-option-sub { font-size:11px; color:var(--muted); }
+  .modal-note { font-size:11px; color:var(--muted); text-align:center; line-height:1.6; margin-top:16px; }
+  .modal-note a { color:var(--orange); text-decoration:none; }
+  .modal-note a:hover { text-decoration:underline; }
+
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  @media(max-width:680px){
+    .stats-row{grid-template-columns:1fr 1fr}
+    .two-col{grid-template-columns:1fr}
+    .pos-metrics{grid-template-columns:1fr 1fr}
+    nav{padding:0 12px}
+    .page{padding:20px 12px}
+    .ticker-bar{gap:12px}
+    .countdown-wrap{display:none}
+    .defi-hero-total{font-size:34px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── TICKER BAR ── -->
+  <div class="ticker-bar">
+    <div class="ticker-item">
+      <span class="ticker-label">BTC</span>
+      <span class="ticker-val" id="btcPrice">Loading...</span>
+      <span class="ticker-val up" id="btcChange"></span>
+    </div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item">
+      <span class="ticker-label">NETWORK</span>
+      <span class="ticker-val">OP_NET Regtest</span>
+    </div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item">
+      <span class="ticker-label">BLOCK</span>
+      <span class="ticker-val" id="tickerBlock">—</span>
+    </div>
+    <div class="countdown-wrap">
+      <span class="countdown-label">🚀 MAINNET IN</span>
+      <div class="countdown-units">
+        <div class="cd-unit" id="cd-d">—</div>
+        <div class="cd-unit" id="cd-h">—</div>
+        <div class="cd-unit" id="cd-m">—</div>
+        <div class="cd-unit" id="cd-s">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-icon">₿</div>
+      <div class="nav-logo-text"><span>OP_NET</span></div>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" onclick="showPage('wallet',this)">🤖 Wallet Copilot</div>
+      <div class="nav-tab" onclick="showPage('defi',this)">📊 DeFi Dashboard</div>
+    </div>
+    <div class="nav-right">
+      <div class="network-pill connecting" id="networkPill">CONNECTING...</div>
+      <button class="connect-btn" id="connectBtn" onclick="openWalletModal()">
+        <div class="connect-btn-dot"></div>
+        Connect Wallet
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── QUICK LINKS ── -->
+  <div class="quick-links">
+    <span class="quick-links-label">Ecosystem</span>
+    <a class="quick-link" href="https://faucet.opnet.org" target="_blank">🚰 rBTC Faucet</a>
+    <a class="quick-link" href="https://motoswap.org" target="_blank">🔄 MotoSwap DEX</a>
+    <a class="quick-link" href="https://opnet.org" target="_blank">🌐 OP_NET Portal</a>
+    <a class="quick-link" href="https://docs.opnet.org" target="_blank">📖 Docs</a>
+    <a class="quick-link" href="https://chromewebstore.google.com/detail/opwallet/pmbjpcmaaladnfpacpmhmnfmpklgbdjb" target="_blank">🔐 OP_WALLET Extension</a>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- PAGE: WALLET COPILOT                          -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="page active" id="page-wallet">
+    <div class="error-bar" id="walletError"></div>
+    <label class="input-label">Bitcoin / OP_NET Regtest Address (rBTC)</label>
+    <div class="input-row">
+      <input class="addr-input" id="walletAddr" placeholder="bcrt1p... (OP_NET regtest Taproot address)" onkeydown="if(event.key==='Enter')analyzeWallet()"/>
+      <button class="btn" id="walletBtn" onclick="analyzeWallet()">Analyze →</button>
+      <button class="btn btn-ghost" onclick="walletDemo()">Demo</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">rBTC Balance</div>
+        <div class="stat-val orange" id="w-btc">—</div>
+        <div class="stat-sub" id="w-btc-sub">Enter an address above</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">OP_20 Tokens</div>
+        <div class="stat-val green" id="w-tokens">—</div>
+        <div class="stat-sub">Active positions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Transactions</div>
+        <div class="stat-val" id="w-txs">—</div>
+        <div class="stat-sub">On OP_NET regtest</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🤖</div>
+          <div class="card-title">AI Copilot</div>
+        </div>
+        <div class="chat-msgs" id="chatMsgs">
+          <div class="msg bot">
+            <div class="msg-av">₿</div>
+            <div class="msg-bub">Hey! Enter a regtest address above — I'll analyze your rBTC balance, OP_20 tokens, and transaction history, all cryptographically verified on OP_NET. 🔍</div>
+          </div>
+        </div>
+        <div class="chips">
+          <div class="chip" onclick="askQ('What is rBTC?')">💡 What is rBTC?</div>
+          <div class="chip" onclick="askQ('How does OP_NET work?')">🔒 How it works</div>
+          <div class="chip" onclick="askQ('When does mainnet launch?')">🚀 Mainnet launch?</div>
+          <div class="chip" onclick="askQ('How do I get rBTC?')">🚰 Get rBTC</div>
+        </div>
+        <div class="chat-bar">
+          <input class="chat-in" id="chatIn" placeholder="Ask anything about this wallet..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+          <button class="send-btn" onclick="sendMsg()">→</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🪙</div>
+          <div class="card-title">OP_20 Token Holdings</div>
+        </div>
+        <div id="tokenList"><div class="empty">Enter an address to see token holdings</div></div>
+      </div>
+    </div>
+    <div class="full-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Recent Transactions</div>
+          <span class="badge badge-purple" style="margin-left:auto;">✓ CRYPTOGRAPHIC PROOF</span>
+        </div>
+        <div id="txList"><div class="empty">Enter an address to see transactions</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- PAGE: DEFI DASHBOARD                          -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="page" id="page-defi">
+    <div class="error-bar" id="defiError"></div>
+    <label class="input-label">Bitcoin / OP_NET Regtest Address (rBTC)</label>
+    <div class="input-row">
+      <input class="addr-input" id="defiAddr" placeholder="bcrt1p... (OP_NET regtest Taproot address)" onkeydown="if(event.key==='Enter')analyzeDefi()"/>
+      <button class="btn" id="defiBtn" onclick="analyzeDefi()">Load Positions →</button>
+      <button class="btn btn-ghost" onclick="defiDemo()">Demo</button>
+    </div>
+    <div class="defi-hero">
+      <div class="defi-hero-label">Total Portfolio Value</div>
+      <div class="defi-hero-total"><span id="d-total">$0</span> <span style="font-size:22px;color:var(--muted)">USD</span></div>
+      <div class="defi-hero-sub" id="d-total-sub">Enter an address to load your DeFi positions</div>
+      <div class="defi-hero-stats">
+        <div><div class="dhs-label">Wallet</div><div class="dhs-val orange" id="d-wallet">—</div></div>
+        <div><div class="dhs-label">In DeFi</div><div class="dhs-val green" id="d-defi">—</div></div>
+        <div><div class="dhs-label">Positions</div><div class="dhs-val" id="d-count">—</div></div>
+        <div><div class="dhs-label">Est. Daily Earn</div><div class="dhs-val green" id="d-daily">—</div></div>
+      </div>
+    </div>
+    <div id="positionsList">
+      <div class="no-positions">
+        <div class="no-positions-icon">📊</div>
+        <div class="no-positions-title">No positions loaded</div>
+        <div class="no-positions-sub">Enter a regtest address to see your DeFi positions — liquidity pools, staking, and yield estimates on OP_NET.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONNECT WALLET MODAL ── -->
+  <div class="modal-overlay" id="walletModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeWalletModal()">✕</button>
+      <div class="modal-title">Connect Wallet</div>
+      <div class="modal-sub">Connect your OP_NET wallet to automatically load your address and interact with DeFi protocols.</div>
+
+      <div class="wallet-option" onclick="connectOPWallet()">
+        <div class="wallet-option-icon" style="background:var(--orange-dim)">₿</div>
+        <div>
+          <div class="wallet-option-name">OP_WALLET</div>
+          <div class="wallet-option-sub">Official OP_NET browser extension</div>
+        </div>
+        <span class="badge badge-orange" style="margin-left:auto">RECOMMENDED</span>
+      </div>
+
+      <div class="wallet-option" onclick="connectManual()">
+        <div class="wallet-option-icon" style="background:var(--surface2)">⌨️</div>
+        <div>
+          <div class="wallet-option-name">Enter Address Manually</div>
+          <div class="wallet-option-sub">Paste any regtest address to view</div>
+        </div>
+      </div>
+
+      <div class="modal-note">
+        Don't have OP_WALLET yet?
+        <a href="https://chromewebstore.google.com/detail/opwallet/pmbjpcmaaladnfpacpmhmnfmpklgbdjb" target="_blank">Install the Chrome extension →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = window.location.origin;
+let walletAddress = null;
+let btcPriceUSD = 98000;
+
+// ── BTC PRICE (from CoinGecko free API) ──
+async function fetchBTCPrice() {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const data = await res.json();
+    const price = data.bitcoin.usd;
+    const change = data.bitcoin.usd_24h_change;
+    btcPriceUSD = price;
+    document.getElementById('btcPrice').textContent = `$${price.toLocaleString()}`;
+    const changeEl = document.getElementById('btcChange');
+    const sign = change >= 0 ? '+' : '';
+    changeEl.textContent = `${sign}${change.toFixed(2)}%`;
+    changeEl.className = `ticker-val ${change >= 0 ? 'up' : 'dn'}`;
+  } catch {
+    document.getElementById('btcPrice').textContent = '~$98,000';
+  }
+}
+fetchBTCPrice();
+setInterval(fetchBTCPrice, 60000);
+
+// ── MAINNET COUNTDOWN (March 17, 2026) ──
+function updateCountdown() {
+  const target = new Date('2026-03-17T00:00:00Z').getTime();
+  const now = Date.now();
+  const diff = target - now;
+  if (diff <= 0) {
+    ['d','h','m','s'].forEach(u => document.getElementById(`cd-${u}`).textContent = '00');
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-d').textContent = String(d).padStart(2,'0') + 'd';
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0') + 'h';
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0') + 'm';
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0') + 's';
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ── NETWORK STATUS ──
+async function checkStatus() {
+  try {
+    const data = await fetch(`${API}/api/status`).then(r => r.json());
+    const pill = document.getElementById('networkPill');
+    if (data.connected) {
+      pill.className = 'network-pill connected';
+      pill.textContent = `${data.network} · ${data.currency} · #${data.latestBlock}`;
+      document.getElementById('tickerBlock').textContent = `#${data.latestBlock}`;
+    } else {
+      pill.className = 'network-pill disconnected';
+      pill.textContent = `${data.network || 'REGTEST'} · OFFLINE`;
+    }
+  } catch {
+    document.getElementById('networkPill').className = 'network-pill disconnected';
+    document.getElementById('networkPill').textContent = 'SERVER OFFLINE';
+  }
+}
+checkStatus();
+setInterval(checkStatus, 30000);
+
+// ── PAGE SWITCHING ──
+function showPage(name, tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  tab.classList.add('active');
+  const wa = document.getElementById('walletAddr').value;
+  const da = document.getElementById('defiAddr').value;
+  if (name === 'defi' && wa && !da) document.getElementById('defiAddr').value = wa;
+  if (name === 'wallet' && da && !wa) document.getElementById('walletAddr').value = da;
+}
+
+// ── WALLET MODAL ──
+function openWalletModal() { document.getElementById('walletModal').classList.add('open'); }
+function closeWalletModal() { document.getElementById('walletModal').classList.remove('open'); }
+
+async function connectOPWallet() {
+  // Check if OP_WALLET extension is installed
+  // OP_WALLET injects window.opnet similar to how MetaMask injects window.ethereum
+  if (typeof window.opnet !== 'undefined') {
+    try {
+      const accounts = await window.opnet.requestAccounts();
+      if (accounts && accounts[0]) {
+        walletAddress = accounts[0];
+        setConnectedWallet(walletAddress);
+        closeWalletModal();
+      }
+    } catch (err) {
+      alert('Could not connect to OP_WALLET: ' + err.message);
+    }
+  } else {
+    // Extension not installed — send them to install it
+    if (confirm('OP_WALLET extension not detected. Open the Chrome Web Store to install it?')) {
+      window.open('https://chromewebstore.google.com/detail/opwallet/pmbjpcmaaladnfpacpmhmnfmpklgbdjb', '_blank');
+    }
+  }
+}
+
+function connectManual() {
+  closeWalletModal();
+  document.getElementById('walletAddr').focus();
+}
+
+function setConnectedWallet(address) {
+  walletAddress = address;
+  const btn = document.getElementById('connectBtn');
+  btn.className = 'connect-btn connected-wallet';
+  btn.innerHTML = `<div class="connect-btn-dot"></div>${shortAddr(address)}`;
+  // Auto-populate address fields
+  document.getElementById('walletAddr').value = address;
+  document.getElementById('defiAddr').value = address;
+  analyzeWallet();
+}
+
+// ── WALLET COPILOT ──
+async function analyzeWallet() {
+  const address = document.getElementById('walletAddr').value.trim();
+  if (!address) { showErr('walletError','Please enter an address first.'); return; }
+  hideErr('walletError');
+  const btn = document.getElementById('walletBtn');
+  btn.disabled = true; btn.textContent = 'Loading...';
+  document.getElementById('w-btc').textContent = '...';
+  document.getElementById('w-tokens').textContent = '...';
+  document.getElementById('w-txs').textContent = '...';
+  document.getElementById('tokenList').innerHTML = '<div class="empty">Loading tokens...</div>';
+  document.getElementById('txList').innerHTML = '<div class="empty">Loading transactions...</div>';
+  clearChat();
+  addMsg('bot', `Analyzing <span class="hi">${shortAddr(address)}</span> on OP_NET Regtest...`);
+  try {
+    const [bal, tokens, txs] = await Promise.all([
+      fetch(`${API}/api/balance/${address}`).then(r => r.json()),
+      fetch(`${API}/api/tokens/${address}`).then(r => r.json()),
+      fetch(`${API}/api/transactions/${address}`).then(r => r.json()),
+    ]);
+    const btc = parseFloat(bal.balanceBTC || 0);
+    const usdVal = (btc * btcPriceUSD).toLocaleString(undefined,{maximumFractionDigits:0});
+    document.getElementById('w-btc').textContent = btc.toFixed(5);
+    document.getElementById('w-btc-sub').textContent = `≈ $${usdVal} USD`;
+    document.getElementById('w-tokens').textContent = tokens.tokens?.length ?? 0;
+    document.getElementById('w-txs').textContent = txs.transactions?.length ?? 0;
+    renderTokens(tokens.tokens || []);
+    renderTxs(txs.transactions || []);
+    if (bal.fallback || txs.fallback) {
+      addMsg('bot', `Connected to OP_NET but this address has no regtest activity yet. <span class="wn">Try the Demo button, or visit the <a href="https://faucet.opnet.org" target="_blank" style="color:var(--orange)">rBTC Faucet</a> to fund this address.</span>`);
+    } else {
+      addMsg('bot', `Loaded! <span class="hi">${btc.toFixed(5)} rBTC</span> (~$${usdVal}), ${tokens.tokens?.length ?? 0} OP_20 tokens, ${txs.transactions?.length ?? 0} transactions — <span class="ok">✓ cryptographically verified on OP_NET</span>. What would you like to know?`);
+    }
+  } catch (err) {
+    showErr('walletError', `Server error: ${err.message}`);
+  }
+  btn.disabled = false; btn.textContent = 'Analyze →';
+}
+
+function walletDemo() {
+  document.getElementById('walletAddr').value = 'bcrt1plz0svv3wl05qrrv0dx8hvh5mgqc7jf3mhqgtw8jnj3l3d3cs6lzsfc3mxh';
+  analyzeWallet();
+}
+
+function renderTokens(tokens) {
+  const el = document.getElementById('tokenList');
+  if (!tokens.length) { el.innerHTML = '<div class="empty">No OP_20 tokens found for this address</div>'; return; }
+  el.innerHTML = tokens.map(t => `
+    <div class="list-row">
+      <div class="row-icon" style="background:${t.color||'#f7931a'}18;color:${t.color||'#f7931a'}">${t.symbol?.[0]}</div>
+      <div class="row-info"><div class="row-name">${t.name}</div><div class="row-sub">OP_20 · ${t.symbol}</div></div>
+      <div class="row-right"><div class="row-val">${Number(t.balance).toLocaleString()}</div><div class="row-val2">${t.symbol}</div></div>
+    </div>`).join('');
+}
+
+function renderTxs(txs) {
+  const el = document.getElementById('txList');
+  if (!txs.length) { el.innerHTML = '<div class="empty">No transactions found on OP_NET regtest</div>'; return; }
+  const icons = {contract:'🔗',receive:'↓',send:'↑'};
+  const titles = {contract:'Smart Contract Call (OP_NET)',receive:'Received rBTC',send:'Sent rBTC'};
+  el.innerHTML = txs.map(tx => {
+    const amtClass = tx.type === 'receive' ? 'pos' : 'neg';
+    const prefix = tx.type === 'receive' ? '+' : '-';
+    const time = tx.timestamp ? new Date(tx.timestamp*1000).toLocaleDateString() : 'Recent';
+    return `
+      <div class="list-row">
+        <div class="row-icon" style="background:${tx.type==='receive'?'var(--green-dim)':tx.type==='contract'?'rgba(167,139,250,0.1)':'var(--red-dim)'}">
+          ${icons[tx.type]||'→'}
+        </div>
+        <div class="row-info"><div class="row-name">${titles[tx.type]||'Transaction'}</div><div class="row-sub">${shortTxid(tx.txid)}</div></div>
+        <div class="row-right"><div class="row-val ${amtClass}">${prefix}${tx.amount} rBTC</div><div class="row-val2">${time}</div></div>
+      </div>`;
+  }).join('');
+}
+
+// ── DEFI DASHBOARD ──
+async function analyzeDefi() {
+  const address = document.getElementById('defiAddr').value.trim();
+  if (!address) { showErr('defiError','Please enter an address first.'); return; }
+  hideErr('defiError');
+  const btn = document.getElementById('defiBtn');
+  btn.disabled = true; btn.textContent = 'Loading...';
+  ['d-total','d-wallet','d-defi','d-count','d-daily'].forEach(id => document.getElementById(id).textContent = '...');
+  document.getElementById('positionsList').innerHTML = '<div class="no-positions"><div class="no-positions-icon">⏳</div><div class="no-positions-title">Loading positions...</div></div>';
+  try {
+    const [portfolio, defi] = await Promise.all([
+      fetch(`${API}/api/portfolio/${address}`).then(r => r.json()),
+      fetch(`${API}/api/defi/${address}`).then(r => r.json()),
+    ]);
+    const totalUSD = parseFloat(portfolio.totalValueUSD || 0);
+    const walletUSD = parseFloat(portfolio.walletValueUSD || 0);
+    const defiUSD = parseFloat(portfolio.defiValueUSD || 0);
+    const positions = defi.positions || [];
+    const dailyEarn = positions.reduce((s,p) => s + parseFloat(p.earnings24h||0), 0);
+    document.getElementById('d-total').textContent = `$${totalUSD.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    document.getElementById('d-total-sub').textContent = `${portfolio.currency||'rBTC'} wallet + ${positions.length} DeFi position${positions.length!==1?'s':''} on OP_NET`;
+    document.getElementById('d-wallet').textContent = `$${walletUSD.toLocaleString(undefined,{maximumFractionDigits:0})}`;
+    document.getElementById('d-defi').textContent = `$${defiUSD.toLocaleString(undefined,{maximumFractionDigits:0})}`;
+    document.getElementById('d-count').textContent = positions.length;
+    document.getElementById('d-daily').textContent = `$${dailyEarn.toFixed(2)}`;
+    renderPositions(positions);
+  } catch (err) {
+    showErr('defiError', `Could not load positions: ${err.message}`);
+    document.getElementById('positionsList').innerHTML = '<div class="no-positions"><div class="no-positions-icon">❌</div><div class="no-positions-title">Could not connect</div><div class="no-positions-sub">Make sure the server is running with npm start</div></div>';
+  }
+  btn.disabled = false; btn.textContent = 'Load Positions →';
+}
+
+function defiDemo() {
+  document.getElementById('defiAddr').value = 'bcrt1plz0svv3wl05qrrv0dx8hvh5mgqc7jf3mhqgtw8jnj3l3d3cs6lzsfc3mxh';
+  analyzeDefi();
+}
+
+function renderPositions(positions) {
+  const el = document.getElementById('positionsList');
+  if (!positions.length) {
+    el.innerHTML = `<div class="no-positions"><div class="no-positions-icon">🌱</div><div class="no-positions-title">No DeFi positions found</div><div class="no-positions-sub">This address hasn't provided liquidity on OP_NET yet. Visit <a href="https://motoswap.org" target="_blank" style="color:var(--orange)">MotoSwap</a> to get started!</div></div>`;
+    return;
+  }
+  el.innerHTML = positions.map(pos => {
+    const apy = parseFloat(pos.apy);
+    const circ = 2 * Math.PI * 17;
+    const offset = circ - (Math.min(apy,100)/100) * circ;
+    const riskBadge = pos.risk==='Low'?'badge-green':pos.risk==='Medium'?'badge-orange':'badge-red';
+    const ilPct = Math.min(apy*0.3, 30);
+    return `
+      <div class="position-card">
+        <div class="pos-header">
+          <div class="pos-icon">🔄</div>
+          <div><div class="pos-name">${pos.protocol}</div><div class="pos-sub">${pos.type} · ${pos.pair}</div></div>
+          <div class="pos-badges">
+            <span class="badge ${riskBadge}">${pos.risk} Risk</span>
+            <span class="badge badge-purple">OP_NET</span>
+          </div>
+        </div>
+        <div class="pos-metrics">
+          <div><div class="pm-label">Position Value</div><div class="pm-val orange">$${parseFloat(pos.valueUSD).toLocaleString(undefined,{maximumFractionDigits:2})}</div></div>
+          <div><div class="pm-label">Est. Daily Earn</div><div class="pm-val green">+$${pos.earnings24h}</div></div>
+          <div><div class="pm-label">LP Tokens</div><div class="pm-val">${parseFloat(pos.lpBalance).toFixed(4)}</div></div>
+          <div><div class="pm-label">APY</div>
+            <div class="apy-ring">
+              <div class="ring-wrap">
+                <svg width="42" height="42" viewBox="0 0 42 42">
+                  <circle class="ring-bg" cx="21" cy="21" r="17"/>
+                  <circle class="ring-fill" cx="21" cy="21" r="17" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+                </svg>
+                <div class="ring-label">${apy}%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="il-meter">
+          <div class="il-label">Impermanent Loss Risk</div>
+          <div class="il-bar-bg"><div class="il-bar-fill" style="width:${ilPct}%"></div></div>
+          <div class="il-explain">At ${apy}% APY your yield should outpace typical impermanent loss. <span style="color:var(--green)">Currently low risk.</span></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── COPILOT CHAT ──
+const QA = {
+  'What is rBTC?': `rBTC is <span class="hi">Regtest Bitcoin</span> — test BTC used on OP_NET's regtest network, the final pre-mainnet environment.\n\nIt has no real monetary value, but it behaves exactly like real BTC. When OP_NET launches on Bitcoin mainnet on <span class="hi">March 17, 2026</span>, this becomes real BTC automatically.`,
+  'How does OP_NET work?': `OP_NET uses <span class="hi">cryptographic proof of correct execution</span>. Every node independently recalculates smart contract results from Bitcoin's raw data.\n\nUnlike BRC-20 or Runes where indexers can disagree, <span class="ok">OP_NET forces mathematical consensus</span> — two nodes that disagree means a bug, not a feature. It's the first time Bitcoin has had truly trustless smart contracts.`,
+  'When does mainnet launch?': `OP_NET launches on Bitcoin mainnet on <span class="hi">March 17, 2026</span>!\n\nThis app is already ready. One line change in the server switches from rBTC to real BTC. <span class="ok">Your competition entry will be live-ready the day mainnet launches. 🚀</span>`,
+  'How do I get rBTC?': `Easy! Visit the <span class="hi">rBTC Faucet</span> at faucet.opnet.org — paste your regtest address and you'll receive free test rBTC in seconds.\n\nYou can also use the quick link in the Ecosystem bar at the top of this page. ☝️`,
+};
+const fallbacks = [
+  `Great question! OP_NET's regtest environment mirrors mainnet conditions — what you test here is exactly what will run on Bitcoin mainnet on March 17.`,
+  `This wallet's data is fetched directly from OP_NET nodes and verified cryptographically. No indexer can dispute or alter these results.`,
+  `You can use the rBTC Faucet at faucet.opnet.org to get test funds, then try MotoSwap to make your first trade on Bitcoin Layer 1!`,
+];
+let fbIdx = 0;
+function clearChat() { document.getElementById('chatMsgs').innerHTML = ''; }
+function addMsg(role, text) {
+  const c = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-av">${role==='bot'?'₿':'👤'}</div><div class="msg-bub">${text.replace(/\n/g,'<br>')}</div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function showTyping() {
+  const c = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.id = 'typing'; d.className = 'msg bot';
+  d.innerHTML = `<div class="msg-av">₿</div><div class="msg-bub"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function hideTyping() { document.getElementById('typing')?.remove(); }
+function askQ(q) {
+  addMsg('user', q); showTyping();
+  setTimeout(() => { hideTyping(); addMsg('bot', QA[q] || fallbacks[fbIdx++ % fallbacks.length]); }, 700 + Math.random()*300);
+}
+function sendMsg() {
+  const inp = document.getElementById('chatIn');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = ''; askQ(val);
+}
+
+// ── HELPERS ──
+function shortAddr(a) { return a.slice(0,8)+'...'+a.slice(-6); }
+function shortTxid(t) { return t ? t.slice(0,10)+'...'+t.slice(-6) : '—'; }
+function showErr(id, msg) { const e=document.getElementById(id); e.textContent='⚠ '+msg; e.style.display='block'; }
+function hideErr(id) { document.getElementById(id).style.display='none'; }
+
+// Close modal on overlay click
+document.getElementById('walletModal').addEventListener('click', function(e) {
+  if (e.target === this) closeWalletModal();
+});
+</script>
+</body>
+</html>

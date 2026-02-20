@@ -1,0 +1,16 @@
+{
+  "name": "opnet-wallet-copilot",
+  "version": "1.0.0",
+  "description": "OP_NET Wallet Copilot - Bitcoin L1 wallet analyzer",
+  "type": "module",
+  "scripts": {
+    "dev": "node --experimental-vm-modules server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@btc-vision/bitcoin": "latest",
+    "cors": "^2.8.6",
+    "express": "^4.18.2",
+    "opnet": "latest"
+  }
+}
