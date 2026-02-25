@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP_NET — Wallet Copilot & DeFi Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --btc: #f7931a;
+    --opnet: #ff6b2b;
+    --dark: #0a0a0f;
+    --card: #111118;
+    --card2: #15151e;
+    --border: rgba(247,147,26,0.18);
+    --glow: rgba(247,147,26,0.12);
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --green: #00d68f;
+    --red: #ff4d6d;
+    --moto: #8b5cf6;
+    --cat: #f472b6;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Grid bg */
+  body::before {
+    content:'';
+    position:fixed; inset:0; z-index:0;
+    background-image: 
+      linear-gradient(rgba(247,147,26,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(247,147,26,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    position: sticky; top:0; z-index:100;
+    display:flex; align-items:center; gap:16px;
+    padding: 0 24px; height: 52px;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-size:17px; font-weight:800; letter-spacing:-0.5px; color:#fff; }
+  .logo span { color: var(--btc); }
+  .price-pill {
+    display:flex; align-items:center; gap:6px;
+    background: rgba(247,147,26,0.1);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 3px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; color: var(--btc);
+  }
+  .price-pill .change { font-size:11px; }
+  .change.up { color: var(--green); }
+  .change.down { color: var(--red); }
+  .topbar-links { display:flex; gap:2px; margin-left:auto; }
+  .topbar-links a {
+    padding: 5px 12px; border-radius:6px; font-size:12px; font-weight:600;
+    color: var(--muted); text-decoration:none; transition:.15s;
+  }
+  .topbar-links a:hover { background:rgba(255,255,255,0.06); color:#fff; }
+  .topbar-links a.active { color: var(--btc); }
+  .connect-btn {
+    padding: 6px 14px; border-radius:6px; font-size:12px; font-weight:700;
+    background: var(--btc); color:#000; border:none; cursor:pointer;
+    font-family: 'Syne', sans-serif; transition:.15s;
+  }
+  .connect-btn:hover { background:#ffa733; }
+
+  /* ─── LAYOUT ─── */
+  .page { position:relative; z-index:1; }
+  .section { padding: 32px 24px; max-width: 1200px; margin: 0 auto; }
+  .section-title {
+    font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    color: var(--muted); margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 60px 24px 40px;
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+  }
+  .hero-left h1 {
+    font-size: clamp(32px, 5vw, 56px); font-weight: 800; line-height:1.05;
+    letter-spacing: -2px;
+  }
+  .hero-left h1 em { font-style:normal; color: var(--btc); }
+  .hero-left p { color: var(--muted); font-size:15px; margin-top:16px; line-height:1.6; }
+  .hero-actions { display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
+  .btn-primary {
+    padding: 10px 22px; background: var(--btc); color:#000; border:none;
+    border-radius:8px; font-weight:700; font-size:14px; cursor:pointer;
+    font-family:'Syne',sans-serif; transition:.15s; text-decoration:none; display:inline-block;
+  }
+  .btn-primary:hover { background:#ffa733; }
+  .btn-ghost {
+    padding: 10px 22px; background:transparent; color:var(--text);
+    border: 1px solid var(--border); border-radius:8px; font-weight:600; font-size:14px;
+    cursor:pointer; font-family:'Syne',sans-serif; transition:.15s; text-decoration:none; display:inline-block;
+  }
+  .btn-ghost:hover { border-color:var(--btc); color:var(--btc); }
+  .hero-right { position:relative; }
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .stat-card {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:16px; position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, var(--btc), transparent);
+  }
+  .stat-label { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+  .stat-val { font-size:22px; font-weight:800; margin-top:6px; color:#fff; font-family:'Space Mono',monospace; }
+  .stat-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+  /* ─── CHART ─── */
+  .chart-section { padding: 0 24px 32px; max-width:1200px; margin:0 auto; }
+  .chart-card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px;
+    position:relative; overflow:hidden;
+  }
+  .chart-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--btc), var(--opnet), transparent);
+  }
+  .chart-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+  .chart-title { font-size:18px; font-weight:800; }
+  .chart-price { font-family:'Space Mono',monospace; font-size:24px; font-weight:700; color:var(--btc); }
+  .chart-change { font-size:13px; padding:3px 8px; border-radius:4px; font-weight:700; font-family:'Space Mono',monospace; }
+  .chart-change.up { background:rgba(0,214,143,0.15); color:var(--green); }
+  .chart-change.down { background:rgba(255,77,109,0.15); color:var(--red); }
+  .chart-tabs { display:flex; gap:4px; margin-left:auto; }
+  .chart-tab {
+    padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;
+    background:transparent; border:1px solid var(--border); color:var(--muted);
+    cursor:pointer; font-family:'Syne',sans-serif; transition:.12s;
+  }
+  .chart-tab.active, .chart-tab:hover { background:var(--btc); color:#000; border-color:var(--btc); }
+  #btcChart { max-height:280px; }
+  .chart-footer { display:flex; gap:24px; margin-top:16px; flex-wrap:wrap; }
+  .chart-stat { font-size:12px; }
+  .chart-stat span { color:var(--muted); margin-right:4px; }
+  .chart-stat b { font-family:'Space Mono',monospace; }
+
+  /* ─── ECOSYSTEM ─── */
+  .eco-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px; }
+  .eco-card {
+    background:var(--card2); border:1px solid var(--border); border-radius:12px;
+    padding:18px; text-decoration:none; color:var(--text);
+    transition:.2s; position:relative; overflow:hidden; display:block;
+  }
+  .eco-card::before {
+    content:''; position:absolute; inset:0; opacity:0; transition:.2s;
+    background: radial-gradient(circle at 30% 30%, rgba(247,147,26,0.08), transparent 70%);
+  }
+  .eco-card:hover::before { opacity:1; }
+  .eco-card:hover { border-color:rgba(247,147,26,0.4); transform:translateY(-2px); }
+  .eco-icon { font-size:28px; margin-bottom:10px; }
+  .eco-name { font-size:14px; font-weight:700; margin-bottom:4px; }
+  .eco-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+  .eco-tag {
+    display:inline-block; margin-top:8px;
+    font-size:10px; font-weight:700; letter-spacing:1px; padding:2px 7px; border-radius:4px;
+    background:rgba(247,147,26,0.12); color:var(--btc); text-transform:uppercase;
+  }
+  .eco-tag.moto { background:rgba(139,92,246,0.15); color:var(--moto); }
+  .eco-tag.cat { background:rgba(244,114,182,0.15); color:var(--cat); }
+
+  /* ─── WALLET COPILOT ─── */
+  .tools-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .tool-card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:24px; position:relative; overflow:hidden;
+  }
+  .tool-card .tc-title { font-size:16px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+  .tool-card .tc-sub { font-size:13px; color:var(--muted); margin-bottom:16px; }
+  .input-row { display:flex; gap:8px; }
+  .addr-input {
+    flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:8px; padding:10px 14px; color:#fff; font-size:13px; outline:none;
+    font-family:'Space Mono',monospace; transition:.15s;
+  }
+  .addr-input:focus { border-color:var(--btc); background:rgba(247,147,26,0.05); }
+  .addr-input::placeholder { color:var(--muted); }
+  .analyze-btn {
+    padding:10px 16px; background:var(--btc); color:#000; border:none;
+    border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;
+    font-family:'Syne',sans-serif; white-space:nowrap; transition:.15s;
+  }
+  .analyze-btn:hover { background:#ffa733; }
+  .result-box {
+    margin-top:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border);
+    border-radius:8px; padding:14px; min-height:80px;
+    font-size:13px; color:var(--muted); font-family:'Space Mono',monospace;
+    line-height:1.6;
+  }
+  .result-box.loading::after {
+    content:'Analyzing...'; animation: blink 1s infinite;
+  }
+  @keyframes blink { 50% { opacity:0.3; } }
+  .ai-bubble {
+    background:rgba(247,147,26,0.08); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px; margin-top:12px; font-size:13px;
+    line-height:1.6;
+  }
+  .ai-bubble .ai-tag { color:var(--btc); font-weight:700; font-size:11px; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; }
+
+  /* ─── GAME ─── */
+  .game-card {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:24px; position:relative; overflow:hidden;
+  }
+  .game-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--moto), var(--cat), var(--btc));
+  }
+  .game-title { font-size:20px; font-weight:800; margin-bottom:4px; }
+  .game-subtitle { font-size:13px; color:var(--muted); margin-bottom:20px; }
+  #gameCanvas {
+    display:block; width:100%; border-radius:10px;
+    border: 1px solid var(--border); background:#06060e;
+    cursor:pointer;
+  }
+  .game-controls { display:flex; gap:10px; margin-top:12px; align-items:center; flex-wrap:wrap; }
+  .game-btn {
+    padding:8px 20px; border-radius:8px; font-weight:700; font-size:13px;
+    cursor:pointer; font-family:'Syne',sans-serif; transition:.15s; border:none;
+  }
+  .game-btn.start { background:var(--moto); color:#fff; }
+  .game-btn.start:hover { background:#7c3aed; }
+  .game-btn.reset { background:transparent; border:1px solid var(--border); color:var(--muted); }
+  .game-btn.reset:hover { border-color:var(--cat); color:var(--cat); }
+  .game-score {
+    font-family:'Space Mono',monospace; font-size:13px;
+    background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.3);
+    padding:6px 14px; border-radius:6px; color:var(--moto);
+  }
+  .game-hint { font-size:12px; color:var(--muted); margin-left:auto; }
+  .game-leaderboard {
+    display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;
+  }
+  .lb-entry {
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:6px; padding:5px 12px; font-size:12px; font-family:'Space Mono',monospace;
+  }
+  .lb-entry .rank { color:var(--btc); margin-right:4px; }
+  .lb-entry .lbscore { color:var(--cat); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top:1px solid var(--border); padding:24px;
+    display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+    max-width:1200px; margin:0 auto;
+  }
+  footer .logo { font-size:14px; }
+  footer p { font-size:12px; color:var(--muted); }
+  footer .footer-links { display:flex; gap:16px; margin-left:auto; flex-wrap:wrap; }
+  footer .footer-links a { font-size:12px; color:var(--muted); text-decoration:none; }
+  footer .footer-links a:hover { color:var(--btc); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width:768px) {
+    .hero { grid-template-columns:1fr; gap:24px; }
+    .tools-grid { grid-template-columns:1fr; }
+    .stats-grid { grid-template-columns:1fr 1fr; }
+    .topbar-links { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="logo">OP<span>_</span>NET</div>
+  <div class="price-pill" id="topPrice">
+    ₿ <span id="topPriceVal">—</span>
+    <span class="change" id="topPriceChange">—</span>
+  </div>
+  <div class="price-pill" style="border-color:rgba(139,92,246,0.3); background:rgba(139,92,246,0.08); color:#a78bfa; font-size:11px;">
+    🛵 BTC L1 DeFi
+  </div>
+  <nav class="topbar-links">
+    <a href="#chart" class="active">Chart</a>
+    <a href="#ecosystem">Ecosystem</a>
+    <a href="#copilot">Copilot</a>
+    <a href="#game">Game</a>
+  </nav>
+  <button class="connect-btn" onclick="alert('Connect OP_WALLET to interact with DeFi!')">Connect Wallet</button>
+</header>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-left">
+      <h1>Bitcoin<br><em>DeFi Hub</em><br>& Copilot</h1>
+      <p>The complete dashboard for OP_NET — Bitcoin Layer 1 smart contracts. Analyze wallets, track BTC live, explore the ecosystem, and play the MotoCat racer.</p>
+      <div class="hero-actions">
+        <a href="#chart" class="btn-primary">Live BTC Chart ↓</a>
+        <a href="#game" class="btn-ghost">🐱 Play MotoCat Race</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">BTC Price</div>
+          <div class="stat-val" id="heroPrice">—</div>
+          <div class="stat-sub" id="heroPriceSub">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Network</div>
+          <div class="stat-val" style="font-size:14px; color:var(--green);">● LIVE</div>
+          <div class="stat-sub">OP_NET Mainnet</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Swaps</div>
+          <div class="stat-val">325k+</div>
+          <div class="stat-sub">MotoSwap testnet</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">$MOTO Staked</div>
+          <div class="stat-val">296M</div>
+          <div class="stat-sub">Across testnet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BTC CHART -->
+  <div class="chart-section" id="chart">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Bitcoin / USD</div>
+          <div style="display:flex; gap:10px; align-items:center; margin-top:4px;">
+            <span class="chart-price" id="chartPrice">Loading...</span>
+            <span class="chart-change up" id="chartChange">—</span>
+          </div>
+        </div>
+        <div class="chart-tabs" id="chartTabs">
+          <button class="chart-tab" onclick="loadChart('1')">1D</button>
+          <button class="chart-tab active" onclick="loadChart('7')">7D</button>
+          <button class="chart-tab" onclick="loadChart('30')">1M</button>
+          <button class="chart-tab" onclick="loadChart('90')">3M</button>
+          <button class="chart-tab" onclick="loadChart('365')">1Y</button>
+        </div>
+      </div>
+      <canvas id="btcChart"></canvas>
+      <div class="chart-footer">
+        <div class="chart-stat"><span>24h High</span><b id="high24">—</b></div>
+        <div class="chart-stat"><span>24h Low</span><b id="low24">—</b></div>
+        <div class="chart-stat"><span>Market Cap</span><b id="mcap">—</b></div>
+        <div class="chart-stat"><span>24h Volume</span><b id="vol24">—</b></div>
+        <div class="chart-stat" style="margin-left:auto; color:var(--muted); font-size:11px;">Powered by CoinGecko</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECOSYSTEM -->
+  <div class="section" id="ecosystem">
+    <div class="section-title">🌐 OP_NET Ecosystem</div>
+    <div class="eco-grid">
+      <a href="https://motoswap.org" target="_blank" class="eco-card">
+        <div class="eco-icon">🛵</div>
+        <div class="eco-name">MotoSwap DEX</div>
+        <div class="eco-desc">The first Bitcoin L1 DEX. Swap OP_20 tokens, provide liquidity, stake & farm $MOTO — fully self-custodial.</div>
+        <span class="eco-tag moto">DEX · $MOTO</span>
+      </a>
+      <a href="https://garage.motoswap.org" target="_blank" class="eco-card">
+        <div class="eco-icon">🐱</div>
+        <div class="eco-name">MotoCats Garage</div>
+        <div class="eco-desc">10,000 Bitcoin-native MotoCats. Stake your NFTs, earn real yield and ecosystem rewards on OP_NET.</div>
+        <span class="eco-tag cat">NFT · OP_721</span>
+      </a>
+      <a href="https://faucet.opnet.org" target="_blank" class="eco-card">
+        <div class="eco-icon">🚰</div>
+        <div class="eco-name">rBTC Faucet</div>
+        <div class="eco-desc">Get regtest BTC to start testing OP_NET DeFi protocols without real funds.</div>
+        <span class="eco-tag">Testnet</span>
+      </a>
+      <a href="https://opnet.org" target="_blank" class="eco-card">
+        <div class="eco-icon">🌐</div>
+        <div class="eco-name">OP_NET Portal</div>
+        <div class="eco-desc">Main hub for OP_NET — earn points, track tasks, and explore the programmable Bitcoin ecosystem.</div>
+        <span class="eco-tag">Portal</span>
+      </a>
+      <a href="https://docs.opnet.org" target="_blank" class="eco-card">
+        <div class="eco-icon">📖</div>
+        <div class="eco-name">Developer Docs</div>
+        <div class="eco-desc">Build OP_20 tokens and OP_721 NFTs with AssemblyScript, Rust, or TypeScript on Bitcoin L1.</div>
+        <span class="eco-tag">Dev</span>
+      </a>
+      <a href="https://chromewebstore.google.com/detail/opwallet/pmbjpcmaaladnfpackmhmnfmpklgbdjb" target="_blank" class="eco-card">
+        <div class="eco-icon">🔐</div>
+        <div class="eco-name">OP_WALLET</div>
+        <div class="eco-desc">Official Bitcoin browser extension wallet for interacting with OP_NET smart contracts.</div>
+        <span class="eco-tag">Wallet</span>
+      </a>
+      <a href="https://motoswap.org/pools" target="_blank" class="eco-card">
+        <div class="eco-icon">🌊</div>
+        <div class="eco-name">Liquidity Pools</div>
+        <div class="eco-desc">Provide liquidity to MotoSwap pools and earn trading fees + $MOTO farming rewards via MotoChef.</div>
+        <span class="eco-tag moto">DeFi · LP</span>
+      </a>
+      <a href="https://opnet.org/points" target="_blank" class="eco-card">
+        <div class="eco-icon">🏆</div>
+        <div class="eco-name">Points & Airdrop</div>
+        <div class="eco-desc">Complete on-chain tasks every 48h to earn points and climb the leaderboard for airdrop rewards.</div>
+        <span class="eco-tag" style="background:rgba(255,215,0,0.12); color:#ffd700;">Airdrop</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- WALLET COPILOT -->
+  <div class="section" id="copilot">
+    <div class="section-title">🤖 Wallet Copilot</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tc-title">🔍 Address Analyzer</div>
+        <div class="tc-sub">Inspect rBTC balance, OP_20 tokens & recent transactions</div>
+        <div class="input-row">
+          <input type="text" class="addr-input" id="analyzeAddr" placeholder="Enter rBTC / OP_NET address..." />
+          <button class="analyze-btn" onclick="analyzeAddress()">Analyze →</button>
+        </div>
+        <div class="result-box" id="analyzeResult">
+          <span style="color:var(--muted)">Enter an address to see cryptographically verified data from OP_NET.</span>
+        </div>
+        <div class="ai-bubble" id="aiBubble" style="display:none">
+          <div class="ai-tag">🤖 AI Copilot</div>
+          <div id="aiText"></div>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tc-title">📊 DeFi Positions</div>
+        <div class="tc-sub">View liquidity pools, staking, and yield estimates</div>
+        <div class="input-row">
+          <input type="text" class="addr-input" id="defiAddr" placeholder="Enter address to load positions..." />
+          <button class="analyze-btn" onclick="loadDefi()">Load →</button>
+        </div>
+        <div class="result-box" id="defiResult">
+          <span style="color:var(--muted)">Enter an address to see DeFi positions on OP_NET.</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin-top:12px;">
+          <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">WALLET</div>
+            <div style="font-size:15px; font-weight:700;" id="statWallet">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">IN DEFI</div>
+            <div style="font-size:15px; font-weight:700;" id="statDefi">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">POSITIONS</div>
+            <div style="font-size:15px; font-weight:700;" id="statPos">—</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); border-radius:8px; padding:10px; text-align:center;">
+            <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">DAILY EST</div>
+            <div style="font-size:15px; font-weight:700; color:var(--green);" id="statYield">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTOCAT RACE GAME -->
+  <div class="section" id="game">
+    <div class="section-title">🎮 MotoCat Racer — OP_NET Edition</div>
+    <div class="game-card">
+      <div class="game-title">🐱🛵 MotoCat Racer</div>
+      <div class="game-subtitle">Race your MotoCat across Bitcoin blocks! Dodge mempool spikes & collect $MOTO. Tap / Space to jump.</div>
+      <canvas id="gameCanvas" height="200"></canvas>
+      <div class="game-controls">
+        <button class="game-btn start" id="startBtn" onclick="startGame()">▶ Start Race</button>
+        <button class="game-btn reset" onclick="resetGame()">↩ Reset</button>
+        <div class="game-score">Score: <span id="scoreDisplay">0</span></div>
+        <div class="game-score" style="background:rgba(244,114,182,0.1); border-color:rgba(244,114,182,0.3); color:var(--cat);">Best: <span id="bestDisplay">0</span></div>
+        <div class="game-hint">SPACE / Tap = Jump &nbsp;|&nbsp; Double-jump available!</div>
+      </div>
+      <div class="game-leaderboard" id="leaderboard"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">OP<span style="color:var(--btc)">_</span>NET</div>
+  <p>Bitcoin Layer 1 DeFi · Powered by OP_NET & MotoSwap</p>
+  <div class="footer-links">
+    <a href="https://opnet.org" target="_blank">OP_NET</a>
+    <a href="https://motoswap.org" target="_blank">MotoSwap</a>
+    <a href="https://garage.motoswap.org" target="_blank">MotoCats</a>
+    <a href="https://docs.opnet.org" target="_blank">Docs</a>
+    <a href="https://faucet.opnet.org" target="_blank">Faucet</a>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════
+// BTC PRICE & CHART
+// ═══════════════════════════════════════
+let btcChart = null;
+let currentDays = '7';
+let priceData = {};
+
+async function fetchBTCPrice() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true&include_high_24h=true&include_low_24h=true');
+    const d = await r.json();
+    const btc = d.bitcoin;
+    priceData = btc;
+    const price = btc.usd.toLocaleString('en-US', {style:'currency',currency:'USD',maximumFractionDigits:0});
+    const change = btc.usd_24h_change.toFixed(2);
+    const up = btc.usd_24h_change >= 0;
+
+    document.getElementById('topPriceVal').textContent = price;
+    document.getElementById('topPriceChange').textContent = (up?'+':'')+change+'%';
+    document.getElementById('topPriceChange').className = 'change ' + (up?'up':'down');
+
+    document.getElementById('chartPrice').textContent = price;
+    document.getElementById('chartChange').textContent = (up?'▲':'▼')+' '+(up?'+':'')+change+'%';
+    document.getElementById('chartChange').className = 'chart-change ' + (up?'up':'down');
+
+    document.getElementById('heroPrice').textContent = '$'+Math.round(btc.usd/1000)+'k';
+    document.getElementById('heroPriceSub').textContent = (up?'+':'')+change+'% 24h';
+
+    document.getElementById('high24').textContent = '$'+btc.usd_high_24h?.toLocaleString('en-US',{maximumFractionDigits:0}) || '—';
+    document.getElementById('low24').textContent = '$'+btc.usd_low_24h?.toLocaleString('en-US',{maximumFractionDigits:0}) || '—';
+    document.getElementById('mcap').textContent = '$'+(btc.usd_market_cap/1e12).toFixed(2)+'T';
+    document.getElementById('vol24').textContent = '$'+(btc.usd_24h_vol/1e9).toFixed(1)+'B';
+  } catch(e) {
+    document.getElementById('chartPrice').textContent = 'API unavailable';
+  }
+}
+
+async function loadChart(days) {
+  currentDays = days;
+  // Update tab styling
+  document.querySelectorAll('.chart-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['1','7','30','90','365'][i] === days);
+  });
+  try {
+    const r = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
+    const d = await r.json();
+    const labels = d.prices.map(p => {
+      const dt = new Date(p[0]);
+      if(days === '1') return dt.getHours()+':'+String(dt.getMinutes()).padStart(2,'0');
+      return (dt.getMonth()+1)+'/'+(dt.getDate());
+    });
+    const prices = d.prices.map(p => p[1]);
+    const startP = prices[0], endP = prices[prices.length-1];
+    const isUp = endP >= startP;
+    const color = isUp ? '#f7931a' : '#ff4d6d';
+
+    if(btcChart) btcChart.destroy();
+    const ctx = document.getElementById('btcChart').getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,280);
+    grad.addColorStop(0, isUp ? 'rgba(247,147,26,0.3)' : 'rgba(255,77,109,0.3)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+    btcChart = new Chart(ctx, {
+      type:'line',
+      data: {
+        labels: labels,
+        datasets:[{
+          data: prices, borderColor: color,
+          backgroundColor: grad, borderWidth: 2,
+          pointRadius: 0, tension: 0.3, fill:true
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:true,
+        interaction: { intersect:false, mode:'index' },
+        plugins: { legend:{display:false}, tooltip:{
+          backgroundColor:'rgba(15,15,20,0.95)',
+          borderColor:'rgba(247,147,26,0.3)', borderWidth:1,
+          titleColor:'#888', bodyColor:'#fff',
+          callbacks:{label: ctx => '$'+ctx.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0})}
+        }},
+        scales: {
+          x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#555', maxTicksLimit:8, font:{size:11}} },
+          y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#555', font:{size:11,family:'Space Mono'},
+            callback: v => '$'+(v/1000).toFixed(0)+'k' }, position:'right' }
+        }
+      }
+    });
+  } catch(e) {
+    console.error('Chart load failed',e);
+  }
+}
+
+// ═══════════════════════════════════════
+// WALLET COPILOT (Mock + Demo)
+// ═══════════════════════════════════════
+function analyzeAddress() {
+  const addr = document.getElementById('analyzeAddr').value.trim();
+  const res = document.getElementById('analyzeResult');
+  const ai = document.getElementById('aiBubble');
+  const aiText = document.getElementById('aiText');
+  if(!addr) { res.innerHTML='<span style="color:var(--red)">Please enter an address.</span>'; return; }
+
+  res.innerHTML='<span style="color:var(--btc)">🔍 Fetching data from OP_NET...</span>';
+  ai.style.display='none';
+
+  setTimeout(() => {
+    // Demo / mock response
+    const isDemo = addr.toLowerCase().includes('demo') || addr.length > 20;
+    if(isDemo) {
+      res.innerHTML = `<span style="color:#aaa">Address:</span> <span style="color:var(--btc)">${addr.slice(0,12)}...${addr.slice(-6)}</span>\n\n` +
+        `<span style="color:#aaa">rBTC Balance:</span> <span style="color:#fff">0.00042 rBTC</span>\n` +
+        `<span style="color:#aaa">OP_20 Tokens:</span>\n` +
+        `  · MOTO  <span style="color:var(--moto)">1,200.00</span>\n` +
+        `  · PILL  <span style="color:var(--cat)">300.50</span>\n\n` +
+        `<span style="color:#aaa">Transactions (last 5):</span> 5 on OP_NET\n` +
+        `  ✓ Swap MOTO→rBTC  <span style="color:var(--green)">confirmed</span>\n` +
+        `  ✓ Add LP  <span style="color:var(--green)">confirmed</span>\n` +
+        `  ✓ Stake MOTO  <span style="color:var(--green)">confirmed</span>`;
+      ai.style.display='block';
+      aiText.innerHTML = `This wallet is <b>active in the MotoSwap ecosystem</b> 🛵 — holding both MOTO and PILL tokens. The LP position suggests they're farming yield. Consider checking the <a href="https://motoswap.org" style="color:var(--btc)">MotoSwap pools page</a> for current APY rates.`;
+    } else {
+      res.innerHTML = `<span style="color:var(--muted)">⚠️ This looks like a demo address. In production, this connects to the OP_NET API.\n\nTry typing <b>demo</b> or any longer address for a sample analysis.</span>`;
+    }
+  }, 1200);
+}
+
+function loadDefi() {
+  const addr = document.getElementById('defiAddr').value.trim();
+  const res = document.getElementById('defiResult');
+  if(!addr) { res.innerHTML='<span style="color:var(--red)">Please enter an address.</span>'; return; }
+  res.innerHTML='<span style="color:var(--btc)">📊 Loading DeFi positions...</span>';
+  setTimeout(() => {
+    if(addr.length > 5) {
+      res.innerHTML = `<b>MotoSwap LP</b>  MOTO/rBTC Pool\n  · Deposited: <span style="color:var(--green)">$420 USD</span>  APY: <span style="color:var(--btc)">38.2%</span>\n\n<b>MotoChef Farm</b>  PILL-MOTO LP\n  · Staked: <span style="color:var(--green)">$180 USD</span>  Est. daily: <span style="color:var(--green)">+0.42 MOTO</span>\n\n<b>MotoCat Staking</b>\n  · 1 NFT staked  Earning: <span style="color:var(--cat)">real yield</span>`;
+      document.getElementById('statWallet').textContent='$240';
+      document.getElementById('statDefi').textContent='$600';
+      document.getElementById('statPos').textContent='3';
+      document.getElementById('statYield').textContent='+$2.1/d';
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════
+// MOTOCAT RACING GAME
+// ═══════════════════════════════════════
+const canvas = document.getElementById('gameCanvas');
+const ctx2 = canvas.getContext('2d');
+let gameState = 'idle'; // idle | playing | dead
+let score = 0, bestScore = parseInt(localStorage.getItem('motocatBest')||'0');
+let raf = null;
+let frameCount = 0;
+let speed = 4;
+let leaderboard = JSON.parse(localStorage.getItem('motocatLB')||'[]');
+
+// Cat physics
+let cat = { x:80, y:0, vy:0, jumps:0, maxJumps:2 };
+let groundY = 0;
+const CAT_W = 38, CAT_H = 38;
+
+// Obstacles
+let obstacles = [];
+// Collectibles
+let motos = [];
+// BG
+let blocks = [];
+let bgOffset = 0;
+let blockHeight = 0;
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 200;
+  groundY = canvas.height - 60;
+  cat.y = groundY - CAT_H;
+  blockHeight = canvas.height;
+}
+
+function initGame() {
+  resizeCanvas();
+  cat = { x:80, y:groundY - CAT_H, vy:0, jumps:0 };
+  obstacles = [];
+  motos = [];
+  bgOffset = 0;
+  score = 0;
+  frameCount = 0;
+  speed = 4;
+  blocks = Array.from({length:8}, (_,i)=>({x:i*(canvas.width/7), w:80+Math.random()*60, h:20+Math.random()*40, col:Math.random()<0.5?'#1a1a2e':'#0f0f1a'}));
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('bestDisplay').textContent = bestScore;
+}
+
+function jump() {
+  if(gameState === 'idle' || gameState === 'dead') { startGame(); return; }
+  if(cat.jumps < 2) {
+    cat.vy = cat.jumps === 0 ? -13 : -10;
+    cat.jumps++;
+  }
+}
+
+function startGame() {
+  if(gameState === 'playing') return;
+  initGame();
+  gameState = 'playing';
+  document.getElementById('startBtn').textContent = '⏸ Running...';
+  gameLoop();
+}
+
+function resetGame() {
+  cancelAnimationFrame(raf);
+  gameState = 'idle';
+  initGame();
+  document.getElementById('startBtn').textContent = '▶ Start Race';
+  drawIdle();
+}
+
+function spawnObstacle() {
+  const type = Math.random();
+  const h = type < 0.5 ? 30+Math.random()*30 : 50+Math.random()*20;
+  const w = 18+Math.random()*14;
+  obstacles.push({
+    x: canvas.width + 20,
+    y: groundY - h,
+    w, h,
+    type: type < 0.3 ? 'spike' : type < 0.7 ? 'block' : 'tall'
+  });
+}
+
+function spawnMoto() {
+  motos.push({ x: canvas.width+10, y: groundY - 40 - Math.random()*60, r:10 });
+}
+
+function gameLoop() {
+  raf = requestAnimationFrame(gameLoop);
+  frameCount++;
+  speed = 4 + Math.floor(frameCount/400)*0.5;
+  score = Math.floor(frameCount/6);
+  document.getElementById('scoreDisplay').textContent = score;
+
+  // Spawn
+  if(frameCount % Math.max(60, 120-Math.floor(frameCount/300)*5) === 0) spawnObstacle();
+  if(frameCount % 180 === 0) spawnMoto();
+
+  // Physics
+  cat.vy += 0.7;
+  cat.y += cat.vy;
+  if(cat.y >= groundY - CAT_H) {
+    cat.y = groundY - CAT_H;
+    cat.vy = 0;
+    cat.jumps = 0;
+  }
+
+  // BG
+  bgOffset = (bgOffset + speed*0.3) % canvas.width;
+  blocks.forEach(b => { b.x -= speed*0.25; if(b.x+b.w < 0) { b.x = canvas.width; b.w=80+Math.random()*60; b.h=20+Math.random()*40; } });
+
+  // Obstacles
+  obstacles.forEach(o => o.x -= speed);
+  obstacles = obstacles.filter(o => o.x + o.w > -20);
+
+  // Motos
+  motos.forEach(m => m.x -= speed);
+  motos = motos.filter(m => {
+    const collected = m.x < cat.x+CAT_W && m.x+20 > cat.x && m.y < cat.y+CAT_H && m.y+20 > cat.y;
+    if(collected) { score += 10; frameCount += 60; } // bonus
+    return m.x > -20 && !collected;
+  });
+
+  // Collision
+  for(const o of obstacles) {
+    const pad = 6;
+    if(cat.x+CAT_W-pad > o.x+pad && cat.x+pad < o.x+o.w-pad &&
+       cat.y+CAT_H-pad > o.y+pad && cat.y+pad < o.y+o.h-pad) {
+      endGame(); return;
+    }
+  }
+
+  // Draw
+  drawGame();
+}
+
+function drawGame() {
+  const w = canvas.width, h = canvas.height;
+  // BG
+  ctx2.fillStyle = '#060610';
+  ctx2.fillRect(0,0,w,h);
+
+  // BG blocks (Bitcoin chain blocks)
+  blocks.forEach(b => {
+    ctx2.fillStyle = b.col;
+    ctx2.fillRect(b.x, h-b.h-40, b.w, b.h);
+    ctx2.strokeStyle='rgba(247,147,26,0.08)';
+    ctx2.strokeRect(b.x, h-b.h-40, b.w, b.h);
+    // Hash label
+    ctx2.fillStyle='rgba(247,147,26,0.15)';
+    ctx2.font='8px Space Mono';
+    ctx2.fillText('BLK', b.x+6, h-b.h-44);
+  });
+
+  // Ground
+  ctx2.fillStyle = '#1a1a2e';
+  ctx2.fillRect(0, groundY, w, h-groundY);
+  ctx2.strokeStyle='rgba(247,147,26,0.3)';
+  ctx2.beginPath(); ctx2.moveTo(0,groundY); ctx2.lineTo(w,groundY); ctx2.stroke();
+
+  // Ground grid
+  ctx2.strokeStyle='rgba(247,147,26,0.06)';
+  for(let x=0; x<w; x+=40) {
+    ctx2.beginPath(); ctx2.moveTo((x-bgOffset%40+40)%40, groundY); ctx2.lineTo((x-bgOffset%40+40)%40, h); ctx2.stroke();
+  }
+
+  // Score HUD
+  ctx2.fillStyle='rgba(247,147,26,0.8)';
+  ctx2.font='bold 13px Syne, sans-serif';
+  ctx2.fillText('🛵 '+score+' pts', 12, 22);
+  ctx2.fillStyle='rgba(255,255,255,0.3)';
+  ctx2.fillText('Best: '+bestScore, 12, 38);
+  // Speed bar
+  const spd = Math.min((speed-4)/4, 1);
+  ctx2.fillStyle='rgba(139,92,246,0.3)';
+  ctx2.fillRect(w-100, 10, 90, 8);
+  ctx2.fillStyle='#8b5cf6';
+  ctx2.fillRect(w-100, 10, 90*spd, 8);
+  ctx2.fillStyle='rgba(255,255,255,0.4)'; ctx2.font='9px Space Mono';
+  ctx2.fillText('SPEED', w-100, 30);
+
+  // $MOTO coins
+  motos.forEach(m => {
+    ctx2.save();
+    ctx2.shadowColor='#8b5cf6'; ctx2.shadowBlur=8;
+    ctx2.fillStyle='#a78bfa';
+    ctx2.beginPath(); ctx2.arc(m.x+10, m.y+10, 10, 0, Math.PI*2); ctx2.fill();
+    ctx2.fillStyle='#fff'; ctx2.font='bold 9px Syne';
+    ctx2.textAlign='center'; ctx2.fillText('M', m.x+10, m.y+14);
+    ctx2.textAlign='left'; ctx2.restore();
+  });
+
+  // Obstacles
+  obstacles.forEach(o => {
+    if(o.type === 'spike') {
+      // mempool spike
+      ctx2.fillStyle='#ff4d6d';
+      ctx2.beginPath();
+      ctx2.moveTo(o.x, o.y+o.h);
+      ctx2.lineTo(o.x+o.w/2, o.y);
+      ctx2.lineTo(o.x+o.w, o.y+o.h);
+      ctx2.closePath(); ctx2.fill();
+      ctx2.fillStyle='rgba(255,77,109,0.2)';
+      ctx2.fillRect(o.x-2, o.y+o.h-2, o.w+4, 4);
+      // label
+      ctx2.fillStyle='rgba(255,77,109,0.7)'; ctx2.font='8px Space Mono';
+      ctx2.fillText('MEMPOOL', o.x-4, o.y-4);
+    } else if(o.type === 'tall') {
+      // wall
+      const grad = ctx2.createLinearGradient(o.x,0,o.x+o.w,0);
+      grad.addColorStop(0,'#f7931a'); grad.addColorStop(1,'rgba(247,147,26,0.3)');
+      ctx2.fillStyle=grad;
+      ctx2.fillRect(o.x, o.y, o.w, o.h);
+      ctx2.fillStyle='rgba(0,0,0,0.4)'; ctx2.font='8px Space Mono';
+      ctx2.fillText('FEE', o.x+3, o.y+14);
+    } else {
+      ctx2.fillStyle='#1e40af';
+      ctx2.fillRect(o.x, o.y, o.w, o.h);
+      ctx2.strokeStyle='rgba(59,130,246,0.5)'; ctx2.strokeRect(o.x, o.y, o.w, o.h);
+      ctx2.fillStyle='rgba(255,255,255,0.3)'; ctx2.font='8px Space Mono';
+      ctx2.fillText('OP_20', o.x+2, o.y+12);
+    }
+  });
+
+  // Cat
+  drawCat(cat.x, cat.y, CAT_W, CAT_H, gameState==='dead');
+}
+
+function drawCat(x, y, w, h, dead=false) {
+  ctx2.save();
+  if(dead) { ctx2.globalAlpha=0.6; ctx2.translate(x+w/2, y+h/2); ctx2.rotate(0.4); x=-w/2; y=-h/2; }
+  // Body
+  ctx2.fillStyle = dead ? '#666' : '#f472b6';
+  ctx2.beginPath();
+  ctx2.roundRect(x, y, w, h, 8);
+  ctx2.fill();
+  // Helmet
+  ctx2.fillStyle = dead ? '#555' : '#f7931a';
+  ctx2.beginPath();
+  ctx2.roundRect(x+4, y+2, w-8, h*0.45, 6);
+  ctx2.fill();
+  // Visor
+  ctx2.fillStyle = dead ? '#333' : '#60a5fa';
+  ctx2.beginPath();
+  ctx2.roundRect(x+8, y+7, w-16, h*0.2, 3);
+  ctx2.fill();
+  // Eyes
+  ctx2.fillStyle = dead ? '#999' : '#fff';
+  ctx2.fillRect(x+8, y+h*0.5, 5, 5);
+  ctx2.fillRect(x+w-13, y+h*0.5, 5, 5);
+  ctx2.fillStyle = dead ? '#fff' : '#111';
+  ctx2.fillRect(x+10, y+h*0.5+1, 2, 3);
+  ctx2.fillRect(x+w-11, y+h*0.5+1, 2, 3);
+  // Ears
+  ctx2.fillStyle = dead ? '#666' : '#f472b6';
+  ctx2.beginPath();
+  ctx2.moveTo(x+4,y+2); ctx2.lineTo(x-2,y-8); ctx2.lineTo(x+10,y+2); ctx2.closePath(); ctx2.fill();
+  ctx2.beginPath();
+  ctx2.moveTo(x+w-4,y+2); ctx2.lineTo(x+w+2,y-8); ctx2.lineTo(x+w-10,y+2); ctx2.closePath(); ctx2.fill();
+  // Moto
+  ctx2.fillStyle = dead ? '#555' : '#fbbf24';
+  ctx2.fillRect(x+4, y+h-10, w-8, 8);
+  // Wheels
+  ctx2.fillStyle=dead?'#444':'#374151';
+  ctx2.beginPath(); ctx2.arc(x+12, y+h, 8,0,Math.PI*2); ctx2.fill();
+  ctx2.beginPath(); ctx2.arc(x+w-12, y+h, 8,0,Math.PI*2); ctx2.fill();
+  ctx2.fillStyle=dead?'#555':'#9ca3af';
+  ctx2.beginPath(); ctx2.arc(x+12, y+h, 4,0,Math.PI*2); ctx2.fill();
+  ctx2.beginPath(); ctx2.arc(x+w-12, y+h, 4,0,Math.PI*2); ctx2.fill();
+  // exhaust
+  if(!dead && frameCount%6<3) {
+    ctx2.fillStyle='rgba(247,147,26,0.6)';
+    ctx2.beginPath(); ctx2.arc(x-8, y+h-6, 4+Math.random()*4,0,Math.PI*2); ctx2.fill();
+  }
+  ctx2.restore();
+}
+
+function drawIdle() {
+  const w = canvas.width, h = canvas.height;
+  ctx2.fillStyle='#060610'; ctx2.fillRect(0,0,w,h);
+  ctx2.fillStyle='#1a1a2e'; ctx2.fillRect(0,groundY,w,h-groundY);
+  ctx2.strokeStyle='rgba(247,147,26,0.3)';
+  ctx2.beginPath(); ctx2.moveTo(0,groundY); ctx2.lineTo(w,groundY); ctx2.stroke();
+  drawCat(80, groundY-CAT_H, CAT_W, CAT_H);
+  // Title
+  ctx2.fillStyle='rgba(255,255,255,0.9)';
+  ctx2.font='bold 22px Syne, sans-serif';
+  ctx2.textAlign='center';
+  ctx2.fillText('🐱 MotoCat Racer', w/2, h/2-16);
+  ctx2.fillStyle='rgba(247,147,26,0.7)';
+  ctx2.font='13px Syne, sans-serif';
+  ctx2.fillText('Press SPACE or tap to start racing!', w/2, h/2+12);
+  ctx2.textAlign='left';
+}
+
+function endGame() {
+  gameState = 'dead';
+  cancelAnimationFrame(raf);
+  if(score > bestScore) {
+    bestScore = score;
+    localStorage.setItem('motocatBest', bestScore);
+  }
+  document.getElementById('bestDisplay').textContent = bestScore;
+  document.getElementById('startBtn').textContent = '▶ Start Race';
+
+  // Add to leaderboard
+  leaderboard.push(score);
+  leaderboard.sort((a,b)=>b-a);
+  leaderboard = leaderboard.slice(0,5);
+  localStorage.setItem('motocatLB', JSON.stringify(leaderboard));
+  renderLeaderboard();
+
+  drawDead();
+}
+
+function drawDead() {
+  drawGame();
+  const w=canvas.width, h=canvas.height;
+  ctx2.fillStyle='rgba(0,0,0,0.65)';
+  ctx2.fillRect(0,0,w,h);
+  ctx2.fillStyle='#ff4d6d';
+  ctx2.font='bold 28px Syne, sans-serif';
+  ctx2.textAlign='center';
+  ctx2.fillText('💥 REKT!', w/2, h/2-24);
+  ctx2.fillStyle='#fff';
+  ctx2.font='16px Syne, sans-serif';
+  ctx2.fillText('Score: '+score, w/2, h/2+4);
+  ctx2.fillStyle='rgba(247,147,26,0.8)';
+  ctx2.font='13px Syne, sans-serif';
+  ctx2.fillText('Tap or press SPACE to race again', w/2, h/2+28);
+  ctx2.textAlign='left';
+}
+
+function renderLeaderboard() {
+  const lb = document.getElementById('leaderboard');
+  lb.innerHTML = '<span style="font-size:11px;color:var(--muted);padding:4px 0;display:block;width:100%">🏆 Session Best:</span>' +
+    leaderboard.map((s,i)=>`<div class="lb-entry"><span class="rank">#${i+1}</span><span class="lbscore">${s}</span></div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e => { if(e.code==='Space'||e.key===' ') { e.preventDefault(); jump(); }});
+canvas.addEventListener('click', jump);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); jump(); }, {passive:false});
+window.addEventListener('resize', () => { if(gameState==='idle') { resizeCanvas(); drawIdle(); }});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+fetchBTCPrice();
+setInterval(fetchBTCPrice, 60000);
+loadChart('7');
+resizeCanvas();
+drawIdle();
+renderLeaderboard();
+</script>
+</body>
+</html>
