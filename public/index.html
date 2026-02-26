@@ -7,7 +7,6 @@
 <meta name="description" content="The ultimate Bitcoin L1 DeFi dashboard. Live BTC & MOTO charts, swap widget, wallet copilot, MotoCat pinball game and full OP_NET ecosystem.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
   --btc:#f7931a; --opnet:#ff6b2b; --dark:#080810; --card:#0f0f1a;
@@ -141,27 +140,6 @@ nav a:hover,nav a.on{color:var(--btc);}
 .upgrade-btn .ub-cost{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);}
 .hashbar{height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:4px;}
 .hashfill{height:100%;background:linear-gradient(90deg,var(--btc),var(--green));border-radius:4px;transition:.1s;}
-
-/* ══ SINGLE CHART ══ */
-.charts-row{padding:0 20px 32px;max-width:1220px;margin:0 auto;}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden;}
-.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.chart-card.btc-card::before{background:linear-gradient(90deg,var(--btc),#ff8c00,transparent);}
-.cc-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
-.cc-name{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
-.cc-price{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1;}
-.cc-chg{font-size:11px;padding:2px 7px;border-radius:4px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px;display:inline-block;}
-.cc-chg.up{background:rgba(0,214,143,0.15);color:var(--green);}
-.cc-chg.dn{background:rgba(255,61,90,0.15);color:var(--red);}
-.chart-tabs{display:flex;gap:3px;margin-left:auto;}
-.ctab{padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;background:transparent;
-  border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;transition:.12s;}
-.ctab.on,.ctab:hover{background:var(--btc);color:#000;border-color:var(--btc);}
-.moto-card .ctab.on,.moto-card .ctab:hover{background:var(--moto);color:#fff;border-color:var(--moto);}
-.cc-foot{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
-.cc-stat{font-size:11px;}
-.cc-stat span{color:var(--muted);margin-right:3px;}
-.cc-stat b{font-family:'Space Mono',monospace;}
 
 /* ══ SWAP WIDGET ══ */
 .swap-section{padding:0 20px 32px;max-width:1220px;margin:0 auto;}
@@ -373,7 +351,6 @@ footer p{font-size:11px;color:var(--muted);}
 /* ══ RESPONSIVE ══ */
 @media(max-width:900px){
   .hero{grid-template-columns:1fr;gap:24px;}
-  .charts-row{grid-template-columns:1fr;}
   .swap-grid{grid-template-columns:1fr;}
   .copilot-grid{grid-template-columns:1fr;}
   .game-layout{grid-template-columns:1fr;}
@@ -394,7 +371,6 @@ footer p{font-size:11px;color:var(--muted);}
   <div class="logo">OP<em>_</em>NET</div>
   <div class="pill pill-btc">₿ <span id="tpBtc">—</span> <span class="chg" id="tpBtcC">—</span></div>
   <nav>
-    <a href="#charts">Charts</a>
     <a href="#swap">Swap</a>
     <a href="#copilot">Copilot</a>
     <a href="#ecosystem">Ecosystem</a>
@@ -409,10 +385,10 @@ footer p{font-size:11px;color:var(--muted);}
 <div class="hero wrap" id="hero">
   <div>
     <h1 class="hero-h1">BITCOIN<br><em class="hero-defi">DEFI</em><br>HUB</h1>
-    <p class="hero-sub">The most complete OP_NET dashboard — live charts, one-click swaps, wallet AI, MotoCat pinball and the full Bitcoin L1 DeFi ecosystem.</p>
+    <p class="hero-sub">The most complete OP_NET dashboard — live BTC price, one-click swaps, wallet AI, MotoCat pinball, block miner and the full Bitcoin L1 DeFi ecosystem.</p>
     <div class="hero-btns">
       <a href="#swap" class="btn-o btn-solid">🔄 Swap Tokens</a>
-      <a href="#charts" class="btn-o btn-ghost">📈 Live Charts</a>
+      <a href="#ecosystem" class="btn-o btn-ghost">🌐 Ecosystem</a>
       <a href="#game" class="btn-o btn-pink">🐱 Play Games</a>
     </div>
   </div>
@@ -436,37 +412,6 @@ footer p{font-size:11px;color:var(--muted);}
       <div class="sc-lbl">MOTO Staked</div>
       <div class="sc-val">296M</div>
       <div class="sc-sub up">+13.8k tBTC staked</div>
-    </div>
-  </div>
-</div>
-
-<!-- CHARTS -->
-<div class="wrap" style="padding-bottom:8px;" id="charts">
-  <div class="sec-title">📈 Live Market Data</div>
-</div>
-<div class="charts-row">
-  <div class="chart-card btc-card">
-    <div class="cc-head">
-      <div>
-        <div class="cc-name">Bitcoin / USD</div>
-        <div class="cc-price" id="cBtcP">—</div>
-        <span class="cc-chg" id="cBtcC">—</span>
-      </div>
-      <div class="chart-tabs" id="btcTabs">
-        <button class="ctab" onclick="loadBtcChart('1')">1D</button>
-        <button class="ctab on" onclick="loadBtcChart('7')">7D</button>
-        <button class="ctab" onclick="loadBtcChart('30')">1M</button>
-        <button class="ctab" onclick="loadBtcChart('90')">3M</button>
-        <button class="ctab" onclick="loadBtcChart('365')">1Y</button>
-      </div>
-    </div>
-    <canvas id="btcChart" height="160"></canvas>
-    <div class="cc-foot">
-      <div class="cc-stat"><span>24h High</span><b id="bHi">—</b></div>
-      <div class="cc-stat"><span>24h Low</span><b id="bLo">—</b></div>
-      <div class="cc-stat"><span>MCap</span><b id="bMC">—</b></div>
-      <div class="cc-stat"><span>Vol</span><b id="bVol">—</b></div>
-      <div style="margin-left:auto;font-size:10px;color:var(--muted);">via CoinGecko</div>
     </div>
   </div>
 </div>
@@ -815,7 +760,6 @@ function toast(msg, type='info', dur=3000) {
 // PRICE DATA
 // ══════════════════════════════════════
 let btcData = {};
-let btcChart = null;
 
 async function fetchPrices() {
   try {
@@ -831,71 +775,18 @@ function fmtUsd(n) { return n ? '$'+fmt(n) : '—'; }
 
 function updatePriceUI() {
   const bp = btcData.usd, bc = btcData.usd_24h_change;
+  if(!bp) return;
   const bup = bc >= 0;
-
-  if(bp) {
-    document.getElementById('tpBtc').textContent = '$'+fmt(bp);
-    const c1 = document.getElementById('tpBtcC');
-    c1.textContent = (bup?'+':'')+bc?.toFixed(2)+'%';
-    c1.className = 'chg ' + (bup?'up':'dn');
-
-    document.getElementById('hBtc').textContent = '$'+Math.round(bp/1000)+'k';
-    const s1 = document.getElementById('hBtcC');
-    s1.textContent = (bup?'▲':'▼')+' '+(bup?'+':'')+bc?.toFixed(2)+'% 24h';
-    s1.className = 'sc-sub '+(bup?'up':'dn');
-
-    document.getElementById('cBtcP').textContent = '$'+fmt(bp);
-    const bc2 = document.getElementById('cBtcC');
-    bc2.textContent = (bup?'▲':'▼')+' '+(bup?'+':'')+bc?.toFixed(2)+'%';
-    bc2.className = 'cc-chg '+(bup?'up':'dn');
-    document.getElementById('bHi').textContent = fmtUsd(btcData.usd_high_24h);
-    document.getElementById('bLo').textContent = fmtUsd(btcData.usd_low_24h);
-    document.getElementById('bMC').textContent = btcData.usd_market_cap ? '$'+(btcData.usd_market_cap/1e12).toFixed(2)+'T' : '—';
-    document.getElementById('bVol').textContent = btcData.usd_24h_vol ? '$'+(btcData.usd_24h_vol/1e9).toFixed(1)+'B' : '—';
-  }
+  const tpBtc = document.getElementById('tpBtc');
+  if(tpBtc) tpBtc.textContent = '$'+fmt(bp);
+  const tpBtcC = document.getElementById('tpBtcC');
+  if(tpBtcC) { tpBtcC.textContent = (bup?'+':'')+bc?.toFixed(2)+'%'; tpBtcC.className = 'chg '+(bup?'up':'dn'); }
+  const hBtc = document.getElementById('hBtc');
+  if(hBtc) hBtc.textContent = '$'+Math.round(bp/1000)+'k';
+  const hBtcC = document.getElementById('hBtcC');
+  if(hBtcC) { hBtcC.textContent = (bup?'▲':'▼')+' '+(bup?'+':'')+bc?.toFixed(2)+'% 24h'; hBtcC.className = 'sc-sub '+(bup?'up':'dn'); }
 }
 
-function makeChart(canvasId, prices, labels, colorHex, isMoto=false) {
-  const prev = isMoto ? motoChart : btcChart;
-  if(prev) prev.destroy();
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  const isUp = prices[prices.length-1] >= prices[0];
-  const col = isUp ? colorHex : '#ff3d5a';
-  const grad = ctx.createLinearGradient(0,0,0,isMoto?200:200);
-  grad.addColorStop(0, col.replace('#','rgba(').replace(/(.{2})(.{2})(.{2})/,'$1,$2,$3') +',0.25)');
-  // simpler way:
-  const gradFill = col + '33';
-  const chart = new Chart(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{data:prices,borderColor:col,backgroundColor:gradFill,borderWidth:1.5,pointRadius:0,tension:.35,fill:true}] },
-    options:{
-      responsive:true,maintainAspectRatio:true,
-      interaction:{intersect:false,mode:'index'},
-      plugins:{legend:{display:false},tooltip:{
-        backgroundColor:'rgba(8,8,16,0.95)',borderColor:'rgba(247,147,26,0.3)',borderWidth:1,
-        titleColor:'#666',bodyColor:'#fff',
-        callbacks:{label:c=>'$'+(isMoto?c.parsed.y.toFixed(6):c.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}))}
-      }},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#444',maxTicksLimit:6,font:{size:10}}},
-        y:{grid:{color:'rgba(255,255,255,0.03)'},position:'right',
-          ticks:{color:'#444',font:{size:10,family:'Space Mono'},
-          callback:v=>isMoto?'$'+v.toFixed(5):'$'+(v/1000).toFixed(0)+'k'}}
-      }
-    }
-  });
-  if(isMoto) motoChart = chart; else btcChart = chart;
-}
-
-async function loadBtcChart(days) {
-  document.querySelectorAll('#btcTabs .ctab').forEach((t,i)=>t.classList.toggle('on',['1','7','30','90','365'][i]===days));
-  try {
-    const r = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
-    const d = await r.json();
-    const labels = d.prices.map(p=>{const dt=new Date(p[0]);return days==='1'?dt.getHours()+':'+String(dt.getMinutes()).padStart(2,'0'):(dt.getMonth()+1)+'/'+(dt.getDate());});
-    makeChart('btcChart', d.prices.map(p=>p[1]), labels, '#f7931a');
-  } catch(e) {}
-}
 
 // ══════════════════════════════════════
 // WALLET
@@ -905,22 +796,26 @@ let walletConnected = false;
 function connectWallet() {
   if(!walletConnected) {
     walletConnected = true;
-    document.querySelector('.conn-btn').textContent = '✓ Connected';
-    document.querySelector('.conn-btn').style.background = 'rgba(0,214,143,0.2)';
-    document.querySelector('.conn-btn').style.color = '#00d68f';
-    document.querySelector('.conn-btn').style.border = '1px solid rgba(0,214,143,0.4)';
-    document.getElementById('fromBal').textContent = '0.042 rBTC';
-    document.getElementById('toBal').textContent = '12,400 MOTO';
-    document.getElementById('swapBtn').textContent = 'Swap Tokens';
-    document.getElementById('swapBtn').disabled = false;
+    const btn = document.querySelector('.conn-btn');
+    btn.textContent = '✓ Connected';
+    btn.style.background = 'rgba(0,214,143,0.2)';
+    btn.style.color = '#00d68f';
+    btn.style.border = '1px solid rgba(0,214,143,0.4)';
+    const fromBal = document.getElementById('fromBal');
+    if(fromBal) fromBal.textContent = '0.042 rBTC';
+    const toBal = document.getElementById('toBal');
+    if(toBal) toBal.textContent = '12,400 MOTO';
+    const swapBtn = document.getElementById('swapBtn');
+    if(swapBtn) { swapBtn.textContent = 'Swap Tokens'; swapBtn.disabled = false; }
     toast('✓ Wallet connected! (demo mode)', 'success');
   } else {
     walletConnected = false;
-    document.querySelector('.conn-btn').textContent = '⚡ Connect Wallet';
-    document.querySelector('.conn-btn').style.cssText = '';
-    document.getElementById('fromBal').textContent = '—';
-    document.getElementById('toBal').textContent = '—';
-    document.getElementById('swapBtn').textContent = 'Connect Wallet to Swap';
+    const btn = document.querySelector('.conn-btn');
+    btn.textContent = '⚡ Connect Wallet'; btn.style.cssText = '';
+    const fromBal = document.getElementById('fromBal'); if(fromBal) fromBal.textContent = '—';
+    const toBal = document.getElementById('toBal'); if(toBal) toBal.textContent = '—';
+    const swapBtn = document.getElementById('swapBtn');
+    if(swapBtn) { swapBtn.textContent = 'Connect Wallet to Swap'; }
     toast('Wallet disconnected', 'error');
   }
 }
@@ -938,44 +833,46 @@ function getRate(from, to) {
 
 function calcSwap() {
   const amt = parseFloat(document.getElementById('swFromAmt').value)||0;
-  if(!amt) { document.getElementById('swToAmt').value=''; document.getElementById('swRate').textContent='Enter amount to see rate'; document.getElementById('swDetails').style.display='none'; return; }
+  if(!amt) {
+    document.getElementById('swToAmt').value='';
+    document.getElementById('swRate').textContent='Enter amount to see rate';
+    document.getElementById('swDetails').style.display='none';
+    return;
+  }
   const rate = getRate(fromTok, toTok);
   const out = amt * rate * 0.997;
   document.getElementById('swToAmt').value = out < 0.001 ? out.toFixed(6) : out.toFixed(4);
   const impact = amt > 1 ? 0.82 : 0.12;
-  document.getElementById('swRate').innerHTML = `<b>1 ${fromTok} ≈ ${rate<0.001?rate.toFixed(6):rate.toFixed(4)} ${toTok}</b>`;
+  document.getElementById('swRate').innerHTML = '<b>1 '+fromTok+' ≈ '+(rate<0.001?rate.toFixed(6):rate.toFixed(4))+' '+toTok+'</b>';
   document.getElementById('swDetails').style.display='block';
-  document.getElementById('swRateB').textContent = `1 ${fromTok} = ${rate<0.001?rate.toFixed(6):rate.toFixed(4)} ${toTok}`;
+  document.getElementById('swRateB').textContent = '1 '+fromTok+' = '+(rate<0.001?rate.toFixed(6):rate.toFixed(4))+' '+toTok;
   document.getElementById('swImpact').textContent = impact+'%';
-  document.getElementById('swImpact').style.color = impact > 1 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('swImpact').style.color = impact > 1 ? '#ff3d5a' : '#00d68f';
   document.getElementById('swFee').textContent = (amt*0.003).toFixed(6)+' '+fromTok;
   document.getElementById('swMin').textContent = (out*0.995).toFixed(4)+' '+toTok;
-  document.getElementById('swRoute').textContent = fromTok + ' → MotoSwap → ' + toTok;
+  document.getElementById('swRoute').textContent = fromTok+' → MotoSwap → '+toTok;
 }
 
 function toggleDropdown(side) {
   const d = document.getElementById(side==='from'?'fromDrop':'toDrop');
   const other = document.getElementById(side==='from'?'toDrop':'fromDrop');
-  other.classList.remove('open');
-  d.classList.toggle('open');
+  other.classList.remove('open'); d.classList.toggle('open');
 }
 
 function selectToken(side, tok, icon, dotClass) {
   const btn = document.getElementById(side==='from'?'fromTokBtn':'toTokBtn');
   const nameEl = document.getElementById(side==='from'?'fromTokName':'toTokName');
   const dot = btn.querySelector('.tok-dot');
-  dot.className = 'tok-dot ' + dotClass;
-  dot.textContent = icon;
+  dot.className = 'tok-dot '+dotClass; dot.textContent = icon;
   nameEl.textContent = tok;
   document.getElementById(side==='from'?'fromDrop':'toDrop').classList.remove('open');
   if(side==='from') fromTok=tok; else toTok=tok;
   calcSwap();
 }
 
-function setMax(side) {
+function setMax() {
   if(!walletConnected) { toast('Connect wallet first!', 'error'); return; }
-  document.getElementById('swFromAmt').value = '0.042';
-  calcSwap();
+  document.getElementById('swFromAmt').value = '0.042'; calcSwap();
 }
 
 function flipTokens() {
@@ -989,7 +886,6 @@ function flipTokens() {
   document.getElementById('fromTokName').textContent=tN;
   document.getElementById('toTokName').textContent=fN;
   fromTok=tN; toTok=fN;
-  const tmpAmt=document.getElementById('swFromAmt').value;
   document.getElementById('swFromAmt').value=document.getElementById('swToAmt').value;
   calcSwap();
 }
@@ -1002,25 +898,24 @@ function executeSwap() {
   btn.textContent='Swapping...'; btn.classList.add('loading'); btn.disabled=true;
   setTimeout(()=>{
     btn.textContent='Swap Tokens'; btn.classList.remove('loading'); btn.disabled=false;
-    toast(`✓ Swapped ${amt} ${fromTok} → ${document.getElementById('swToAmt').value} ${toTok}`, 'success', 4000);
+    toast('✓ Swapped '+amt+' '+fromTok+' → '+document.getElementById('swToAmt').value+' '+toTok, 'success', 4000);
     addFakeTx(fromTok, toTok, amt);
   }, 1800);
 }
 
 function addFakeTx(from, to, amt) {
   const txs = document.getElementById('recentTxs');
+  if(!txs) return;
   const div = document.createElement('div');
   div.className='tx-item';
-  div.innerHTML=`<div class="tx-dot" style="background:var(--cat)"></div><div class="tx-addr">bcrt1p...you</div><div class="tx-amt">${amt} ${from}→${to}</div><div class="tx-time">just now</div>`;
+  div.innerHTML='<div class="tx-dot" style="background:#ec4899"></div><div class="tx-addr">bcrt1p...you</div><div class="tx-amt">'+amt+' '+from+'→'+to+'</div><div class="tx-time">just now</div>';
   txs.insertBefore(div, txs.firstChild);
   if(txs.children.length>6) txs.removeChild(txs.lastChild);
 }
 
-// Close dropdowns on outside click
 document.addEventListener('click', e => {
-  if(!e.target.closest('.tok-pos-rel')) {
+  if(!e.target.closest('.tok-pos-rel'))
     document.querySelectorAll('.tok-dropdown').forEach(d=>d.classList.remove('open'));
-  }
 });
 
 // ══════════════════════════════════════
@@ -1030,110 +925,101 @@ function analyzeAddr() {
   const addr = document.getElementById('anaAddr').value.trim();
   const res = document.getElementById('anaRes');
   const ai = document.getElementById('anaAI');
-  if(!addr) { res.innerHTML='<span style="color:var(--red)">Please enter an address.</span>'; return; }
-  res.innerHTML='<span style="color:var(--btc)">⟳ Querying OP_NET...</span>';
+  if(!addr) { res.innerHTML='<span style="color:#ff3d5a">Please enter an address.</span>'; return; }
+  res.innerHTML='<span style="color:#f7931a">⟳ Querying OP_NET...</span>';
   ai.style.display='none';
   setTimeout(()=>{
-    res.innerHTML=`Address: <span style="color:var(--btc)">${addr.slice(0,14)}...${addr.slice(-6)||addr}</span>\n\nrBTC Balance:  <span style="color:#fff">0.00842 rBTC</span>\n\nOP_20 Tokens:\n  MOTO  <span style="color:#a78bfa">12,400.00</span>\n  PILL  <span style="color:var(--green)">3,200.50</span>\n  CATS  <span style="color:var(--cat)">1 NFT</span>\n\nTransactions (last 7):\n  ✓ Swap rBTC→MOTO    <span style="color:var(--green)">confirmed</span>\n  ✓ Add LP rBTC/MOTO  <span style="color:var(--green)">confirmed</span>\n  ✓ Stake MOTO        <span style="color:var(--green)">confirmed</span>\n  ✓ Claim PILL reward <span style="color:var(--green)">confirmed</span>`;
+    const a = addr==='demo' ? 'bcrt1p...demo1234' : addr;
+    res.innerHTML='Address: <span style="color:#f7931a">'+a.slice(0,14)+'...'+a.slice(-6)+'</span>\n\nrBTC Balance:  <span style="color:#fff">0.00842 rBTC</span>\n\nOP_20 Tokens:\n  MOTO  <span style="color:#a78bfa">12,400.00</span>\n  PILL  <span style="color:#00d68f">3,200.50</span>\n  CATS  <span style="color:#ec4899">1 NFT</span>\n\nTransactions (last 7):\n  ✓ Swap rBTC→MOTO    <span style="color:#00d68f">confirmed</span>\n  ✓ Add LP rBTC/MOTO  <span style="color:#00d68f">confirmed</span>\n  ✓ Stake MOTO        <span style="color:#00d68f">confirmed</span>\n  ✓ Claim PILL reward <span style="color:#00d68f">confirmed</span>';
     ai.style.display='block';
-    document.getElementById('anaAITxt').innerHTML=`This wallet is <b>deeply embedded in the MotoSwap ecosystem</b> 🛵 — holding MOTO, PILL and a MotoCat NFT. The LP position in rBTC/MOTO is earning an estimated <b>38.2% APY</b>. Recommend checking <a href="https://motoswap.org/pools" style="color:var(--moto)">MotoSwap pools</a> to compound rewards. MOTO stake is also active — great for long-term yield accumulation.`;
+    document.getElementById('anaAITxt').innerHTML='This wallet is <b>deeply embedded in the MotoSwap ecosystem</b> 🛵 — holding MOTO, PILL and a MotoCat NFT. The LP position in rBTC/MOTO is earning an estimated <b>38.2% APY</b>. Recommend checking <a href="https://motoswap.org/pools" style="color:#7c3aed">MotoSwap pools</a> to compound rewards.';
   }, 1100);
 }
 
 function loadDefi() {
   const addr = document.getElementById('defiAddr').value.trim();
   const res = document.getElementById('defiRes');
-  if(!addr) { res.innerHTML='<span style="color:var(--red)">Please enter an address.</span>'; return; }
-  res.innerHTML='<span style="color:var(--moto)">⟳ Loading DeFi positions...</span>';
+  if(!addr) { res.innerHTML='<span style="color:#ff3d5a">Please enter an address.</span>'; return; }
+  res.innerHTML='<span style="color:#7c3aed">⟳ Loading DeFi positions...</span>';
   setTimeout(()=>{
-    res.innerHTML=`MotoSwap LP  rBTC/MOTO\n  Deposited: <span style="color:var(--green)">$840 USD</span>  APY: <span style="color:var(--btc)">38.2%</span>\n\nMotoChef Farm  PILL-MOTO LP\n  Staked: <span style="color:var(--green)">$380 USD</span>  Daily: <span style="color:var(--green)">+0.82 MOTO</span>\n\nMotoCat Staking\n  1 NFT staked  Earning: <span style="color:var(--cat)">real yield</span>`;
-    document.getElementById('dsW').textContent='$480';
-    document.getElementById('dsD').textContent='$1,220';
-    document.getElementById('dsP').textContent='3';
-    document.getElementById('dsY').textContent='+$4.2/d';
+    res.innerHTML='MotoSwap LP  rBTC/MOTO\n  Deposited: <span style="color:#00d68f">$840 USD</span>  APY: <span style="color:#f7931a">38.2%</span>\n\nMotoChef Farm  PILL-MOTO LP\n  Staked: <span style="color:#00d68f">$380 USD</span>  Daily: <span style="color:#00d68f">+0.82 MOTO</span>\n\nMotoCat Staking\n  1 NFT staked  Earning: <span style="color:#ec4899">real yield</span>';
+    const dsW=document.getElementById('dsW'); if(dsW) dsW.textContent='$480';
+    const dsD=document.getElementById('dsD'); if(dsD) dsD.textContent='$1,220';
+    const dsP=document.getElementById('dsP'); if(dsP) dsP.textContent='3';
+    const dsY=document.getElementById('dsY'); if(dsY) dsY.textContent='+$4.2/d';
   }, 1000);
 }
 
 // ══════════════════════════════════════
-// MOTOCAT PINBALL — PONG BUMPERS
+// PINBALL — PONG PADDLE BUMPERS
 // ══════════════════════════════════════
-const pb = document.getElementById('pb');
-const gc = pb.getContext('2d');
-let PBW, PBH;
+const pbCanvas = document.getElementById('pb');
+const gc = pbCanvas.getContext('2d');
+let PBW = 380, PBH = 520;
 let pbState = 'idle';
-let pbScore = 0, pbBest = parseInt(localStorage.getItem('pbBest')||'0');
+let pbScore = 0;
+let pbBest = parseInt(localStorage.getItem('pbBest')||'0');
 let pbRaf = null;
-let lives = 3, mult = 1, multTimer = 0;
+let pbLives = 3, pbMult = 1, pbMultTimer = 0;
 let leftFlip = false, rightFlip = false;
 let ballLaunched = false;
-let pbLB = JSON.parse(localStorage.getItem('pbLB')||'[]');
+let pbLB = [];
+try { pbLB = JSON.parse(localStorage.getItem('pbLB')||'[]'); } catch(e){}
+
+let pbBall = {x:190, y:390, vx:2.5, vy:-9, r:9};
+let pbFlippers = {lx:176, ly:460, lw:60, rx:204, ry:460, rw:60};
+let pbPaddles = [];
+let pbTargets = [];
 
 function resizePB() {
-  PBW = pb.offsetWidth || 380;
+  PBW = pbCanvas.offsetWidth || 380;
   PBH = 520;
-  pb.width = PBW;
-  pb.height = PBH;
+  pbCanvas.width = PBW;
+  pbCanvas.height = PBH;
 }
-
-let ball = {};
-let flippers = {};
-// PONG-STYLE PADDLE BUMPERS: {x,y,w,h, vdir, speed, col, lbl, pts, flash, type}
-let paddles = [];
-let targets = [];
 
 function pbInit() {
   resizePB();
   const cx = PBW/2;
-  ball = { x:cx, y:PBH-130, vx:2.5, vy:-9, r:9 };
-  flippers = {
-    lx: cx-14, ly: PBH-60, lw:60,
-    rx: cx+14, ry: PBH-60, rw:60
-  };
-  // Pong-style moving paddle bumpers — horizontal and vertical sliders
-  paddles = [
-    // Top horizontal paddle (rBTC) — slides left/right
-    {x:cx-36,y:90, w:72,h:14, vx:1.8,vy:0, col:'#f7931a',lbl:'₿ rBTC',pts:500,flash:0,axis:'h',minX:30,maxX:PBW-102},
-    // Mid-left paddle (MOTO) — slides up/down
-    {x:28,y:200, w:14,h:60, vx:0,vy:1.5, col:'#7c3aed',lbl:'M',pts:200,flash:0,axis:'v',minY:160,maxY:300},
-    // Mid-right paddle (PILL) — slides up/down opposite direction
-    {x:PBW-42,y:240, w:14,h:60, vx:0,vy:-1.5, col:'#10b981',lbl:'P',pts:100,flash:0,axis:'v',minY:160,maxY:300},
-    // Lower horizontal paddle (MotoCat) — slides left/right fast
-    {x:cx-44,y:310, w:88,h:14, vx:-2.2,vy:0, col:'#ec4899',lbl:'🐱 CAT',pts:1000,flash:0,axis:'h',minX:30,maxX:PBW-118},
-    // OP_20 small vertical paddle (left-center)
-    {x:cx-80,y:190, w:12,h:44, vx:0,vy:1.2, col:'#3b82f6',lbl:'OP',pts:150,flash:0,axis:'v',minY:150,maxY:280},
-    // OP_20 small vertical paddle (right-center)
-    {x:cx+68,y:220, w:12,h:44, vx:0,vy:-1.2, col:'#3b82f6',lbl:'20',pts:150,flash:0,axis:'v',minY:150,maxY:280},
+  pbBall = {x:cx, y:PBH-130, vx:2.5, vy:-9, r:9};
+  pbFlippers = {lx:cx-14, ly:PBH-60, lw:60, rx:cx+14, ry:PBH-60, rw:60};
+  pbPaddles = [
+    {x:cx-36, y:90,  w:72, h:14, vx:1.8,  vy:0,   col:'#f7931a', lbl:'₿ rBTC', pts:500,  flash:0, axis:'h', minX:25,       maxX:PBW-97},
+    {x:28,    y:200, w:14, h:60, vx:0,    vy:1.5,  col:'#7c3aed', lbl:'M',      pts:200,  flash:0, axis:'v', minY:160,      maxY:300},
+    {x:PBW-42,y:240, w:14, h:60, vx:0,    vy:-1.5, col:'#10b981', lbl:'P',      pts:100,  flash:0, axis:'v', minY:160,      maxY:300},
+    {x:cx-44, y:310, w:88, h:14, vx:-2.2, vy:0,    col:'#ec4899', lbl:'🐱 CAT', pts:1000, flash:0, axis:'h', minX:25,       maxX:PBW-113},
+    {x:cx-80, y:190, w:12, h:44, vx:0,    vy:1.2,  col:'#3b82f6', lbl:'OP',     pts:150,  flash:0, axis:'v', minY:150,      maxY:280},
+    {x:cx+68, y:220, w:12, h:44, vx:0,    vy:-1.2, col:'#3b82f6', lbl:'20',     pts:150,  flash:0, axis:'v', minY:150,      maxY:280},
   ];
-  targets = [
-    {x:30,y:PBH*0.35,w:16,h:55,hit:false,pts:80,col:'#fbbf24'},
-    {x:PBW-46,y:PBH*0.35,w:16,h:55,hit:false,pts:80,col:'#fbbf24'},
-    {x:30,y:PBH*0.55,w:16,h:55,hit:false,pts:80,col:'#f472b6'},
-    {x:PBW-46,y:PBH*0.55,w:16,h:55,hit:false,pts:80,col:'#f472b6'},
+  pbTargets = [
+    {x:25,      y:PBH*0.35, w:16, h:55, hit:false, pts:80, col:'#fbbf24'},
+    {x:PBW-41,  y:PBH*0.35, w:16, h:55, hit:false, pts:80, col:'#fbbf24'},
+    {x:25,      y:PBH*0.55, w:16, h:55, hit:false, pts:80, col:'#f472b6'},
+    {x:PBW-41,  y:PBH*0.55, w:16, h:55, hit:false, pts:80, col:'#f472b6'},
   ];
-  pbScore=0; mult=1; multTimer=0; lives=3; ballLaunched=false;
-  updatePBUI();
+  pbScore=0; pbMult=1; pbMultTimer=0; pbLives=3; ballLaunched=false;
+  pbUpdateUI();
 }
 
-function updatePBUI() {
-  document.getElementById('pbScore').textContent = pbScore.toLocaleString();
-  document.getElementById('pbBest').textContent = pbBest.toLocaleString();
-  for(let i=0;i<3;i++){const el=document.getElementById('life'+i);if(el)el.className='life-cat '+(i<lives?'alive':'');}
-  const mPct=Math.min((mult-1)/4,1)*100;
-  document.getElementById('multFill').style.width=mPct+'%';
-  document.getElementById('multVal').textContent='x'+mult.toFixed(1);
+function pbUpdateUI() {
+  const sc=document.getElementById('pbScore'); if(sc) sc.textContent=pbScore.toLocaleString();
+  const bs=document.getElementById('pbBest'); if(bs) bs.textContent=pbBest.toLocaleString();
+  for(let i=0;i<3;i++){const el=document.getElementById('life'+i); if(el) el.className='life-cat '+(i<pbLives?'alive':'');}
+  const mf=document.getElementById('multFill'); if(mf) mf.style.width=Math.min((pbMult-1)/4,1)*100+'%';
+  const mv=document.getElementById('multVal'); if(mv) mv.textContent='x'+pbMult.toFixed(1);
 }
 
 function pbStart() {
   if(pbState==='playing') return;
   pbInit(); pbState='playing';
-  document.getElementById('pbStartBtn').textContent='🚀 Playing...';
-  ballLaunched=true; ball.vy=-9; ball.vx=(Math.random()-0.5)*4;
+  const btn=document.getElementById('pbStartBtn'); if(btn) btn.textContent='🚀 Playing...';
+  ballLaunched=true; pbBall.vy=-9; pbBall.vx=(Math.random()-0.5)*4;
   pbLoop();
 }
 
 function pbReset() {
   cancelAnimationFrame(pbRaf); pbState='idle'; pbInit();
-  document.getElementById('pbStartBtn').textContent='▶ Launch Cat!';
+  const btn=document.getElementById('pbStartBtn'); if(btn) btn.textContent='▶ Launch Cat!';
   pbDraw();
 }
 
@@ -1141,287 +1027,256 @@ function pbLoop() { pbRaf=requestAnimationFrame(pbLoop); pbUpdate(); pbDraw(); }
 
 function pbUpdate() {
   if(!ballLaunched) return;
-  ball.vy+=0.28; ball.vy=Math.min(ball.vy,13);
-  ball.x+=ball.vx; ball.y+=ball.vy;
+  pbBall.vy += 0.28; if(pbBall.vy>13) pbBall.vy=13;
+  pbBall.x += pbBall.vx; pbBall.y += pbBall.vy;
 
-  // Walls
-  if(ball.x-ball.r<20){ball.x=20+ball.r;ball.vx=Math.abs(ball.vx)*0.92;}
-  if(ball.x+ball.r>PBW-20){ball.x=PBW-20-ball.r;ball.vx=-Math.abs(ball.vx)*0.92;}
-  if(ball.y-ball.r<10){ball.y=10+ball.r;ball.vy=Math.abs(ball.vy)*0.85;}
+  if(pbBall.x-pbBall.r<20){pbBall.x=20+pbBall.r; pbBall.vx=Math.abs(pbBall.vx)*0.92;}
+  if(pbBall.x+pbBall.r>PBW-20){pbBall.x=PBW-20-pbBall.r; pbBall.vx=-Math.abs(pbBall.vx)*0.92;}
+  if(pbBall.y-pbBall.r<10){pbBall.y=10+pbBall.r; pbBall.vy=Math.abs(pbBall.vy)*0.85;}
 
-  // Move paddles
-  paddles.forEach(p=>{
+  pbPaddles.forEach(p=>{
     if(p.axis==='h'){
       p.x+=p.vx;
-      if(p.x<p.minX||p.x>p.maxX){p.vx*=-1;p.x=Math.max(p.minX,Math.min(p.maxX,p.x));}
+      if(p.x<=p.minX||p.x>=p.maxX){p.vx*=-1; p.x=Math.max(p.minX,Math.min(p.maxX,p.x));}
     } else {
       p.y+=p.vy;
-      if(p.y<p.minY||p.y>p.maxY){p.vy*=-1;p.y=Math.max(p.minY,Math.min(p.maxY,p.y));}
+      if(p.y<=p.minY||p.y>=p.maxY){p.vy*=-1; p.y=Math.max(p.minY,Math.min(p.maxY,p.y));}
     }
-    if(p.flash>0)p.flash--;
+    if(p.flash>0) p.flash--;
 
-    // Ball vs paddle collision (AABB + push out + reflect)
-    const bx=ball.x,by=ball.y,br=ball.r;
-    const closestX=Math.max(p.x,Math.min(bx,p.x+p.w));
-    const closestY=Math.max(p.y,Math.min(by,p.y+p.h));
-    const dx=bx-closestX,dy=by-closestY;
+    const bx=pbBall.x, by=pbBall.y, br=pbBall.r;
+    const cx2=Math.max(p.x,Math.min(bx,p.x+p.w));
+    const cy2=Math.max(p.y,Math.min(by,p.y+p.h));
+    const dx=bx-cx2, dy=by-cy2;
     const dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<br){
-      // push out
-      if(dist>0){ball.x+=dx/dist*(br-dist+1);ball.y+=dy/dist*(br-dist+1);}
-      // reflect based on which face hit
-      const overlapL=bx-(p.x+p.w), overlapR=p.x-bx;
-      const overlapT=by-(p.y+p.h), overlapB=p.y-by;
-      const minH=Math.min(Math.abs(overlapL),Math.abs(overlapR));
-      const minV=Math.min(Math.abs(overlapT),Math.abs(overlapB));
-      if(minV<minH){
-        ball.vy=-ball.vy*1.05;
-        if(p.axis==='h')ball.vx+=p.vx*0.4; // inherit paddle momentum
+    if(dist<br && dist>0) {
+      pbBall.x+=dx/dist*(br-dist+1);
+      pbBall.y+=dy/dist*(br-dist+1);
+      const overlapH=Math.min(Math.abs(bx-(p.x+p.w)), Math.abs(p.x-bx));
+      const overlapV=Math.min(Math.abs(by-(p.y+p.h)), Math.abs(p.y-by));
+      if(overlapV<overlapH){
+        pbBall.vy=-pbBall.vy*1.05;
+        if(p.axis==='h') pbBall.vx+=p.vx*0.4;
       } else {
-        ball.vx=-ball.vx*1.05;
-        if(p.axis==='v')ball.vy+=p.vy*0.4;
+        pbBall.vx=-pbBall.vx*1.05;
+        if(p.axis==='v') pbBall.vy+=p.vy*0.4;
       }
-      ball.vx=Math.max(-14,Math.min(14,ball.vx));
-      ball.vy=Math.max(-14,Math.min(14,ball.vy));
-      const pts=Math.round(p.pts*mult);
-      pbScore+=pts; p.flash=12;
-      multTimer=140; mult=Math.min(mult+0.12,5);
-      updatePBUI();
+      pbBall.vx=Math.max(-14,Math.min(14,pbBall.vx));
+      pbBall.vy=Math.max(-14,Math.min(14,pbBall.vy));
+      pbScore+=Math.round(p.pts*pbMult); p.flash=12;
+      pbMultTimer=140; pbMult=Math.min(pbMult+0.12,5);
+      pbUpdateUI();
     }
   });
 
-  // Side targets
-  targets.forEach(t=>{
-    if(ball.x>t.x&&ball.x<t.x+t.w&&ball.y>t.y&&ball.y<t.y+t.h){
-      ball.vx=-ball.vx*1.1; pbScore+=Math.round(t.pts*mult);
-      t.hit=true; setTimeout(()=>t.hit=false,300); updatePBUI();
+  pbTargets.forEach(t=>{
+    if(pbBall.x>t.x&&pbBall.x<t.x+t.w&&pbBall.y>t.y&&pbBall.y<t.y+t.h){
+      pbBall.vx=-pbBall.vx*1.1;
+      pbScore+=Math.round(t.pts*pbMult);
+      t.hit=true; setTimeout(()=>t.hit=false,300);
+      pbUpdateUI();
     }
   });
 
-  // Flippers
   const lAng=leftFlip?Math.PI+0.4:Math.PI-0.32;
   const rAng=rightFlip?-0.4:0.32;
-  checkFlipper(flippers.lx,flippers.ly,flippers.lw,lAng);
-  checkFlipper(flippers.rx,flippers.ry,flippers.rw,rAng);
+  checkFlipper(pbFlippers.lx,pbFlippers.ly,pbFlippers.lw,lAng);
+  checkFlipper(pbFlippers.rx,pbFlippers.ry,pbFlippers.rw,rAng);
 
-  // Multiplier decay
-  if(multTimer>0){multTimer--;}else{mult=Math.max(1,mult-0.004);updatePBUI();}
+  if(pbMultTimer>0){pbMultTimer--;}else{pbMult=Math.max(1,pbMult-0.004); pbUpdateUI();}
 
-  // Lost ball
-  if(ball.y>PBH+20){
-    lives--;updatePBUI();
-    if(lives<=0){pbEndGame();return;}
-    ball.x=PBW/2;ball.y=PBH-130;ball.vx=(Math.random()-0.5)*3;ball.vy=-9;
+  if(pbBall.y>PBH+20){
+    pbLives--; pbUpdateUI();
+    if(pbLives<=0){pbEndGame();return;}
+    pbBall.x=PBW/2; pbBall.y=PBH-130;
+    pbBall.vx=(Math.random()-0.5)*3; pbBall.vy=-9;
   }
 }
 
-function checkFlipper(px,py,len,angle) {
-  const fx=px+Math.cos(angle)*len,fy=py+Math.sin(angle)*len;
-  const ex=fx-px,ey=fy-py,lenSq=ex*ex+ey*ey;
-  const t=Math.max(0,Math.min(1,(( ball.x-px)*ex+(ball.y-py)*ey)/lenSq));
-  const cx=px+t*ex,cy=py+t*ey;
-  const dist=Math.sqrt((ball.x-cx)**2+(ball.y-cy)**2)||1;
-  if(dist<ball.r+5){
-    const nx=(ball.x-cx)/dist,ny=(ball.y-cy)/dist;
-    const spd=Math.sqrt(ball.vx**2+ball.vy**2);
-    ball.vx=nx*Math.max(spd*1.1,8);ball.vy=ny*Math.max(spd*1.1,8)-2;
-    ball.x=cx+nx*(ball.r+6);ball.y=cy+ny*(ball.r+6);
+function checkFlipper(px,py,len,angle){
+  const fx=px+Math.cos(angle)*len, fy=py+Math.sin(angle)*len;
+  const ex=fx-px, ey=fy-py, lsq=ex*ex+ey*ey;
+  if(lsq===0) return;
+  const t=Math.max(0,Math.min(1,((pbBall.x-px)*ex+(pbBall.y-py)*ey)/lsq));
+  const cpx=px+t*ex, cpy=py+t*ey;
+  const dist=Math.sqrt((pbBall.x-cpx)**2+(pbBall.y-cpy)**2)||1;
+  if(dist<pbBall.r+5){
+    const nx=(pbBall.x-cpx)/dist, ny=(pbBall.y-cpy)/dist;
+    const spd=Math.sqrt(pbBall.vx**2+pbBall.vy**2);
+    pbBall.vx=nx*Math.max(spd*1.1,8);
+    pbBall.vy=ny*Math.max(spd*1.1,8)-2;
+    pbBall.x=cpx+nx*(pbBall.r+6);
+    pbBall.y=cpy+ny*(pbBall.r+6);
   }
 }
 
-function pbDraw() {
+function pbDraw(){
   gc.clearRect(0,0,PBW,PBH);
-  gc.fillStyle='#04040e';gc.fillRect(0,0,PBW,PBH);
-  // Grid
-  gc.strokeStyle='rgba(247,147,26,0.03)';
+  gc.fillStyle='#04040e'; gc.fillRect(0,0,PBW,PBH);
+  gc.strokeStyle='rgba(247,147,26,0.03)'; gc.lineWidth=1;
   for(let x=0;x<PBW;x+=30){gc.beginPath();gc.moveTo(x,0);gc.lineTo(x,PBH);gc.stroke();}
   for(let y=0;y<PBH;y+=30){gc.beginPath();gc.moveTo(0,y);gc.lineTo(PBW,y);gc.stroke();}
-  // Walls
-  gc.strokeStyle='rgba(247,147,26,0.4)';gc.lineWidth=2;
+  gc.strokeStyle='rgba(247,147,26,0.4)'; gc.lineWidth=2;
   gc.beginPath();gc.moveTo(20,0);gc.lineTo(20,PBH);gc.stroke();
   gc.beginPath();gc.moveTo(PBW-20,0);gc.lineTo(PBW-20,PBH);gc.stroke();
   gc.lineWidth=1;
 
-  // Side targets
-  targets.forEach(t=>{
+  pbTargets.forEach(t=>{
     gc.fillStyle=t.hit?'#fff':t.col;
-    gc.shadowColor=t.col;gc.shadowBlur=t.hit?14:4;
-    gc.fillRect(t.x,t.y,t.w,t.h);gc.shadowBlur=0;
+    gc.shadowColor=t.col; gc.shadowBlur=t.hit?14:4;
+    gc.fillRect(t.x,t.y,t.w,t.h);
+    gc.shadowBlur=0;
   });
 
-  // PONG PADDLE BUMPERS
-  paddles.forEach(p=>{
-    const flash=p.flash>0;
+  pbPaddles.forEach(p=>{
+    const fl=p.flash>0;
     gc.save();
-    gc.shadowColor=p.col;gc.shadowBlur=flash?28:10;
-    // Rounded rect paddle
-    const r=Math.min(p.w,p.h)/2;
-    gc.fillStyle=flash?'#fff':p.col;
-    gc.beginPath();gc.roundRect(p.x,p.y,p.w,p.h,r);gc.fill();
-    // Inner shine
-    gc.fillStyle='rgba(255,255,255,0.18)';
-    gc.beginPath();gc.roundRect(p.x+2,p.y+2,p.w-4,(p.h-4)*0.5,r*0.5);gc.fill();
-    // Label
-    gc.fillStyle=flash?p.col:'rgba(0,0,0,0.85)';
-    gc.font=`bold ${p.w>40?'10':'8'}px Syne,sans-serif`;
-    gc.textAlign='center';gc.textBaseline='middle';
-    gc.fillText(p.lbl,p.x+p.w/2,p.y+p.h/2);
-    // Score popup
-    if(flash){
-      gc.fillStyle='rgba(255,255,255,0.95)';gc.font='bold 11px Space Mono,monospace';
-      gc.fillText('+'+p.pts,p.x+p.w/2,p.y-12);
+    gc.shadowColor=p.col; gc.shadowBlur=fl?28:10;
+    gc.fillStyle=fl?'#ffffff':p.col;
+    const r2=Math.min(p.w,p.h)/2;
+    gc.beginPath(); gc.roundRect(p.x,p.y,p.w,p.h,r2); gc.fill();
+    gc.fillStyle='rgba(255,255,255,0.15)';
+    gc.beginPath(); gc.roundRect(p.x+2,p.y+2,p.w-4,Math.max(2,(p.h-4)*0.4),r2*0.5); gc.fill();
+    gc.fillStyle=fl?p.col:'rgba(0,0,0,0.9)';
+    gc.font='bold '+(p.w>40?'10':'8')+'px sans-serif';
+    gc.textAlign='center'; gc.textBaseline='middle';
+    gc.shadowBlur=0;
+    gc.fillText(p.lbl, p.x+p.w/2, p.y+p.h/2);
+    if(fl){
+      gc.fillStyle='rgba(255,255,255,0.95)';
+      gc.font='bold 11px monospace';
+      gc.fillText('+'+p.pts, p.x+p.w/2, p.y-12);
     }
-    // Direction arrows on paddles
-    gc.fillStyle='rgba(255,255,255,0.25)';gc.font='9px sans-serif';
-    if(p.axis==='h')gc.fillText(p.vx>0?'→':'←',p.x+p.w/2,p.y+p.h+11);
-    else gc.fillText(p.vy>0?'↓':'↑',p.x+p.w+11,p.y+p.h/2);
-    gc.shadowBlur=0;gc.restore();
+    gc.fillStyle='rgba(255,255,255,0.2)'; gc.font='9px sans-serif';
+    if(p.axis==='h') gc.fillText(p.vx>0?'→':'←', p.x+p.w/2, p.y+p.h+11);
+    else gc.fillText(p.vy>0?'↓':'↑', p.x+p.w+10, p.y+p.h/2);
+    gc.restore();
   });
 
-  // Flippers
   const lAng=leftFlip?Math.PI+0.4:Math.PI-0.32;
   const rAng=rightFlip?-0.4:0.32;
-  drawFlipper(flippers.lx,flippers.ly,flippers.lw,lAng);
-  drawFlipper(flippers.rx,flippers.ry,flippers.rw,rAng);
+  drawFlipper(pbFlippers.lx,pbFlippers.ly,pbFlippers.lw,lAng);
+  drawFlipper(pbFlippers.rx,pbFlippers.ry,pbFlippers.rw,rAng);
 
-  // Drain line
-  gc.strokeStyle='rgba(255,61,90,0.25)';gc.lineWidth=1;
+  gc.strokeStyle='rgba(255,61,90,0.25)'; gc.lineWidth=1;
   gc.beginPath();gc.moveTo(20,PBH-18);gc.lineTo(PBW-20,PBH-18);gc.stroke();
 
-  // Ball
   if(ballLaunched||pbState!=='idle'){
     gc.save();
-    gc.shadowColor='#f472b6';gc.shadowBlur=14;
-    const bg=gc.createRadialGradient(ball.x-3,ball.y-3,1,ball.x,ball.y,ball.r);
-    bg.addColorStop(0,'#fce7f3');bg.addColorStop(0.5,'#ec4899');bg.addColorStop(1,'#9d174d');
-    gc.fillStyle=bg;gc.beginPath();gc.arc(ball.x,ball.y,ball.r,0,Math.PI*2);gc.fill();
-    gc.font='11px sans-serif';gc.textAlign='center';gc.textBaseline='middle';gc.shadowBlur=0;
-    gc.fillText('🐱',ball.x,ball.y);gc.restore();
+    gc.shadowColor='#f472b6'; gc.shadowBlur=14;
+    const bg=gc.createRadialGradient(pbBall.x-3,pbBall.y-3,1,pbBall.x,pbBall.y,pbBall.r);
+    bg.addColorStop(0,'#fce7f3'); bg.addColorStop(0.5,'#ec4899'); bg.addColorStop(1,'#9d174d');
+    gc.fillStyle=bg; gc.beginPath(); gc.arc(pbBall.x,pbBall.y,pbBall.r,0,Math.PI*2); gc.fill();
+    gc.font='11px sans-serif'; gc.textAlign='center'; gc.textBaseline='middle';
+    gc.shadowBlur=0; gc.fillText('🐱',pbBall.x,pbBall.y);
+    gc.restore();
   }
 
-  // Overlay states
   if(pbState==='idle'){
-    gc.fillStyle='rgba(0,0,0,0.62)';gc.fillRect(0,0,PBW,PBH);
-    gc.save();gc.font='bold 26px Bebas Neue,sans-serif';gc.textAlign='center';
-    gc.fillStyle='#fff';gc.shadowColor='#f472b6';gc.shadowBlur=18;
+    gc.fillStyle='rgba(0,0,0,0.62)'; gc.fillRect(0,0,PBW,PBH);
+    gc.save(); gc.textAlign='center';
+    gc.font='bold 26px Bebas Neue,sans-serif'; gc.fillStyle='#fff';
+    gc.shadowColor='#f472b6'; gc.shadowBlur=18;
     gc.fillText('🐱 MOTOCAT PINBALL',PBW/2,PBH/2-22);
-    gc.font='13px Syne,sans-serif';gc.fillStyle='rgba(247,147,26,0.85)';gc.shadowBlur=0;
-    gc.fillText('Moving paddles · Pong-style bumpers!',PBW/2,PBH/2+6);
-    gc.font='11px Syne,sans-serif';gc.fillStyle='var(--muted)';
-    gc.fillText('Press Launch Cat! to start',PBW/2,PBH/2+26);gc.restore();
+    gc.font='13px sans-serif'; gc.fillStyle='rgba(247,147,26,0.85)'; gc.shadowBlur=0;
+    gc.fillText('Moving pong paddles as bumpers!',PBW/2,PBH/2+6);
+    gc.font='11px sans-serif'; gc.fillStyle='#5a5a72';
+    gc.fillText('Click or press Space to Launch',PBW/2,PBH/2+26);
+    gc.restore();
   }
   if(pbState==='dead'){
-    gc.fillStyle='rgba(0,0,0,0.7)';gc.fillRect(0,0,PBW,PBH);
-    gc.save();gc.font='bold 32px Bebas Neue,sans-serif';gc.textAlign='center';
-    gc.fillStyle='#ff3d5a';gc.shadowColor='#ff3d5a';gc.shadowBlur=20;
+    gc.fillStyle='rgba(0,0,0,0.7)'; gc.fillRect(0,0,PBW,PBH);
+    gc.save(); gc.textAlign='center';
+    gc.font='bold 32px Bebas Neue,sans-serif'; gc.fillStyle='#ff3d5a';
+    gc.shadowColor='#ff3d5a'; gc.shadowBlur=20;
     gc.fillText('REKT! 💀',PBW/2,PBH/2-28);
-    gc.font='18px Space Mono,monospace';gc.fillStyle='#fff';gc.shadowBlur=0;
+    gc.font='18px monospace'; gc.fillStyle='#fff'; gc.shadowBlur=0;
     gc.fillText('Score: '+pbScore.toLocaleString(),PBW/2,PBH/2+6);
-    gc.font='13px Syne,sans-serif';gc.fillStyle='rgba(247,147,26,0.8)';
-    gc.fillText('Press Launch Cat to play again',PBW/2,PBH/2+30);gc.restore();
+    gc.font='13px sans-serif'; gc.fillStyle='rgba(247,147,26,0.8)';
+    gc.fillText('Click to play again',PBW/2,PBH/2+30);
+    gc.restore();
   }
 }
 
 function drawFlipper(px,py,len,angle){
-  const ex=px+Math.cos(angle)*len,ey=py+Math.sin(angle)*len;
-  gc.save();gc.shadowColor='#7c3aed';gc.shadowBlur=8;
-  gc.strokeStyle='#a78bfa';gc.lineWidth=9;gc.lineCap='round';
-  gc.beginPath();gc.moveTo(px,py);gc.lineTo(ex,ey);gc.stroke();
-  gc.strokeStyle='rgba(255,255,255,0.28)';gc.lineWidth=3;
-  gc.beginPath();gc.moveTo(px,py);gc.lineTo(ex,ey);gc.stroke();
-  gc.fillStyle='#c4b5fd';gc.beginPath();gc.arc(px,py,4,0,Math.PI*2);gc.fill();
-  gc.shadowBlur=0;gc.restore();
+  const ex=px+Math.cos(angle)*len, ey=py+Math.sin(angle)*len;
+  gc.save(); gc.shadowColor='#7c3aed'; gc.shadowBlur=8;
+  gc.strokeStyle='#a78bfa'; gc.lineWidth=9; gc.lineCap='round';
+  gc.beginPath(); gc.moveTo(px,py); gc.lineTo(ex,ey); gc.stroke();
+  gc.strokeStyle='rgba(255,255,255,0.28)'; gc.lineWidth=3;
+  gc.beginPath(); gc.moveTo(px,py); gc.lineTo(ex,ey); gc.stroke();
+  gc.fillStyle='#c4b5fd'; gc.beginPath(); gc.arc(px,py,4,0,Math.PI*2); gc.fill();
+  gc.shadowBlur=0; gc.restore();
 }
 
 function pbEndGame(){
-  pbState='dead';cancelAnimationFrame(pbRaf);
-  if(pbScore>pbBest){pbBest=pbScore;localStorage.setItem('pbBest',pbBest);}
-  pbLB.push(pbScore);pbLB.sort((a,b)=>b-a);pbLB=pbLB.slice(0,5);
+  pbState='dead'; cancelAnimationFrame(pbRaf);
+  if(pbScore>pbBest){pbBest=pbScore; localStorage.setItem('pbBest',pbBest);}
+  pbLB.push(pbScore); pbLB.sort((a,b)=>b-a); pbLB=pbLB.slice(0,5);
   localStorage.setItem('pbLB',JSON.stringify(pbLB));
-  renderPbLB();updatePBUI();
-  document.getElementById('pbStartBtn').textContent='▶ Launch Cat!';
+  renderPbLB(); pbUpdateUI();
+  const btn=document.getElementById('pbStartBtn'); if(btn) btn.textContent='▶ Launch Cat!';
   pbDraw();
 }
 
 function renderPbLB(){
+  const el=document.getElementById('pbLb'); if(!el) return;
   const ranks=['g','s','b','',''];
-  document.getElementById('pbLb').innerHTML=pbLB.map((s,i)=>
-    `<div class="lb-row"><span class="lb-rank ${ranks[i]}">#${i+1}</span><span>Run ${i+1}</span><span class="lb-pts">${s.toLocaleString()}</span></div>`
-  ).join('')||'<div style="font-size:11px;color:var(--muted)">No scores yet</div>';
+  el.innerHTML = pbLB.length
+    ? pbLB.map((s,i)=>'<div class="lb-row"><span class="lb-rank '+ranks[i]+'">#'+(i+1)+'</span><span>Run '+(i+1)+'</span><span class="lb-pts">'+s.toLocaleString()+'</span></div>').join('')
+    : '<div style="font-size:11px;color:#5a5a72">No scores yet</div>';
 }
 
-// Controls
 document.addEventListener('keydown',e=>{
-  if(e.code==='KeyZ'||e.code==='ArrowLeft'){leftFlip=true;}
-  if(e.code==='Slash'||e.code==='ArrowRight'){rightFlip=true;}
-  if(e.code==='Space'){e.preventDefault();if(pbState!=='playing')pbStart();}
+  if(e.code==='KeyZ'||e.code==='ArrowLeft') leftFlip=true;
+  if(e.code==='Slash'||e.code==='ArrowRight') rightFlip=true;
+  if(e.code==='Space'){e.preventDefault(); if(pbState!=='playing') pbStart();}
 });
 document.addEventListener('keyup',e=>{
-  if(e.code==='KeyZ'||e.code==='ArrowLeft'){leftFlip=false;}
-  if(e.code==='Slash'||e.code==='ArrowRight'){rightFlip=false;}
+  if(e.code==='KeyZ'||e.code==='ArrowLeft') leftFlip=false;
+  if(e.code==='Slash'||e.code==='ArrowRight') rightFlip=false;
 });
-pb.addEventListener('touchstart',e=>{
-  const rect=pb.getBoundingClientRect();
-  Array.from(e.touches).forEach(t=>{const x=t.clientX-rect.left;if(x<PBW/2)leftFlip=true;else rightFlip=true;});
-  if(pbState!=='playing')pbStart();
+pbCanvas.addEventListener('touchstart',e=>{
+  const rect=pbCanvas.getBoundingClientRect();
+  Array.from(e.touches).forEach(t=>{
+    if(t.clientX-rect.left<PBW/2) leftFlip=true; else rightFlip=true;
+  });
+  if(pbState!=='playing') pbStart();
 },{passive:true});
-pb.addEventListener('touchend',()=>{leftFlip=false;rightFlip=false;});
-pb.addEventListener('mousedown',e=>{
+pbCanvas.addEventListener('touchend',()=>{leftFlip=false;rightFlip=false;});
+pbCanvas.addEventListener('mousedown',e=>{
   if(pbState!=='playing'){pbStart();return;}
-  const rect=pb.getBoundingClientRect();
-  if(e.clientX-rect.left<PBW/2)leftFlip=true;else rightFlip=true;
+  const rect=pbCanvas.getBoundingClientRect();
+  if(e.clientX-rect.left<PBW/2) leftFlip=true; else rightFlip=true;
 });
-pb.addEventListener('mouseup',()=>{leftFlip=false;rightFlip=false;});
-let PBW, PBH;
-let pbState = 'idle';
-let pbScore = 0, pbBest = parseInt(localStorage.getItem('pbBest')||'0');
-let pbRaf = null;
-let lives = 3, mult = 1, multTimer = 0;
-let leftFlip = false, rightFlip = false;
-let ballLaunched = false;
-let pbLB = JSON.parse(localStorage.getItem('pbLB')||'[]');
-
-function resizePB() {
-  PBW = pb.offsetWidth || 380;
-  PBH = 520;
-  pb.width = PBW;
-  pb.height = PBH;
-}
-
-// Ball
-let ball = {};
-// Flippers
-let flippers = {};
-// Bumpers
-let bumpers = [];
-// Targets
-let targets = [];
+pbCanvas.addEventListener('mouseup',()=>{leftFlip=false;rightFlip=false;});
 
 // ══════════════════════════════════════
-// MOTOCAT RIDER (random intervals)
+// MOTOCAT RIDER
 // ══════════════════════════════════════
 const riderCanvas = document.getElementById('motoRider');
-const rctx = riderCanvas.getContext('2d');
+const rctx = riderCanvas ? riderCanvas.getContext('2d') : null;
 
-function drawRider(facing=1) {
-  const W=140,H=70;
+function drawRiderFrame(facing){
+  if(!rctx) return;
+  const W=140, H=70;
   rctx.clearRect(0,0,W,H);
   rctx.save();
   if(facing===-1){rctx.translate(W,0);rctx.scale(-1,1);}
-  // Exhaust puff
-  rctx.fillStyle='rgba(247,147,26,0.35)';
-  rctx.beginPath();rctx.arc(10,42,7+Math.random()*5,0,Math.PI*2);rctx.fill();
-  rctx.beginPath();rctx.arc(4,46,4+Math.random()*3,0,Math.PI*2);rctx.fill();
-  // Moto body
+  // exhaust
+  rctx.fillStyle='rgba(247,147,26,0.3)';
+  rctx.beginPath();rctx.arc(12,42,7,0,Math.PI*2);rctx.fill();
+  rctx.beginPath();rctx.arc(5,47,4,0,Math.PI*2);rctx.fill();
+  // body
   rctx.fillStyle='#f7931a';
   rctx.beginPath();rctx.roundRect(22,32,68,18,4);rctx.fill();
-  // Seat
-  rctx.fillStyle='#333';rctx.beginPath();rctx.roundRect(42,26,36,10,3);rctx.fill();
-  // Handlebars
-  rctx.strokeStyle='#666';rctx.lineWidth=3;rctx.lineCap='round';
-  rctx.beginPath();rctx.moveTo(78,28);rctx.lineTo(88,22);rctx.stroke();
-  rctx.beginPath();rctx.moveTo(88,22);rctx.lineTo(88,30);rctx.stroke();
-  // Wheels
+  // seat
+  rctx.fillStyle='#2d2d2d';rctx.beginPath();rctx.roundRect(42,26,36,10,3);rctx.fill();
+  // handlebars
+  rctx.strokeStyle='#888';rctx.lineWidth=3;rctx.lineCap='round';
+  rctx.beginPath();rctx.moveTo(78,28);rctx.lineTo(90,22);rctx.stroke();
+  rctx.beginPath();rctx.moveTo(90,22);rctx.lineTo(90,30);rctx.stroke();
+  // wheels
   [30,82].forEach(wx=>{
     rctx.strokeStyle='#374151';rctx.lineWidth=6;
     rctx.beginPath();rctx.arc(wx,52,14,0,Math.PI*2);rctx.stroke();
@@ -1429,223 +1284,225 @@ function drawRider(facing=1) {
     rctx.beginPath();rctx.arc(wx,52,14,0,Math.PI*2);rctx.stroke();
     rctx.fillStyle='#9ca3af';rctx.beginPath();rctx.arc(wx,52,5,0,Math.PI*2);rctx.fill();
   });
-  // Fork
+  // fork
   rctx.strokeStyle='#888';rctx.lineWidth=3;
   rctx.beginPath();rctx.moveTo(82,36);rctx.lineTo(82,52);rctx.stroke();
   rctx.beginPath();rctx.moveTo(78,36);rctx.lineTo(82,52);rctx.stroke();
-  // Cat body (helmet)
-  rctx.fillStyle='#ec4899';
-  rctx.beginPath();rctx.roundRect(50,8,28,24,8);rctx.fill();
-  // Helmet
+  // cat body
+  rctx.fillStyle='#ec4899';rctx.beginPath();rctx.roundRect(50,8,28,24,8);rctx.fill();
+  // helmet
   rctx.fillStyle='#f7931a';rctx.beginPath();rctx.roundRect(52,8,24,14,6);rctx.fill();
-  // Visor
+  // visor
   rctx.fillStyle='#60a5fa';rctx.beginPath();rctx.roundRect(55,12,18,6,3);rctx.fill();
-  // Ears
+  // ears
   rctx.fillStyle='#ec4899';
-  rctx.beginPath();rctx.moveTo(52,10);rctx.lineTo(47,2);rctx.lineTo(55,8);rctx.closePath();rctx.fill();
-  rctx.beginPath();rctx.moveTo(76,10);rctx.lineTo(81,2);rctx.lineTo(73,8);rctx.closePath();rctx.fill();
-  // Eyes
+  rctx.beginPath();rctx.moveTo(52,10);rctx.lineTo(46,2);rctx.lineTo(55,8);rctx.closePath();rctx.fill();
+  rctx.beginPath();rctx.moveTo(76,10);rctx.lineTo(82,2);rctx.lineTo(73,8);rctx.closePath();rctx.fill();
+  // eyes
   rctx.fillStyle='#fff';rctx.fillRect(55,20,5,5);rctx.fillRect(68,20,5,5);
-  rctx.fillStyle='#1a1a2e';rctx.fillRect(57,21,3,3);rctx.fillRect(70,21,3,3);
-  // Speed lines
-  rctx.strokeStyle='rgba(247,147,26,0.4)';rctx.lineWidth=1.5;
-  [20,26,32].forEach((y,i)=>{
-    rctx.beginPath();rctx.moveTo(-10,y);rctx.lineTo(10-i*3,y);rctx.stroke();
+  rctx.fillStyle='#111';rctx.fillRect(57,21,3,3);rctx.fillRect(70,21,3,3);
+  // speed lines
+  rctx.strokeStyle='rgba(247,147,26,0.5)';rctx.lineWidth=1.5;
+  [18,24,30].forEach((y,i)=>{
+    rctx.beginPath();rctx.moveTo(-14,y);rctx.lineTo(8-i*2,y);rctx.stroke();
   });
   rctx.restore();
 }
 
 let riderActive=false;
 function launchRider(){
-  if(riderActive)return;
+  if(riderActive||!riderCanvas) return;
   riderActive=true;
   const goRight=Math.random()>0.5;
-  riderCanvas.style.animation='none';
-  riderCanvas.style.bottom=Math.floor(60+Math.random()*120)+'px';
-  riderCanvas.style.left=goRight?'-160px':'calc(100vw + 10px)';
-  riderCanvas.style.transform=goRight?'scaleX(1)':'scaleX(-1)';
-  drawRider(goRight?1:-1);
-  // Animate with JS for smooth motion
-  let posX=goRight?-160:window.innerWidth+10;
-  const targetX=goRight?window.innerWidth+160:-160;
+  const startX=goRight?-160:window.innerWidth+20;
+  const endX=goRight?window.innerWidth+160:-160;
   const spd=(goRight?1:-1)*(4+Math.random()*3);
-  let frame=0;
-  function rideStep(){
+  const baseY=70+Math.floor(Math.random()*140);
+  riderCanvas.style.bottom=baseY+'px';
+  riderCanvas.style.left=startX+'px';
+  riderCanvas.style.transform=goRight?'none':'scaleX(-1)';
+  riderCanvas.style.display='block';
+  drawRiderFrame(goRight?1:-1);
+  let posX=startX;
+  function step(){
     posX+=spd;
     riderCanvas.style.left=posX+'px';
-    // Wobble
-    riderCanvas.style.bottom=(parseInt(riderCanvas.style.bottom)+Math.sin(frame*0.3)*0.6)+'px';
-    frame++;
-    drawRider(goRight?1:-1);
-    if((goRight&&posX<targetX)||(!goRight&&posX>targetX)){requestAnimationFrame(rideStep);}
-    else{riderActive=false;}
+    drawRiderFrame(goRight?1:-1);
+    if(goRight?posX<endX:posX>endX) requestAnimationFrame(step);
+    else { riderCanvas.style.display='none'; riderActive=false; }
   }
-  requestAnimationFrame(rideStep);
+  requestAnimationFrame(step);
 }
-// Random intervals between 8-22 seconds
 function scheduleRider(){
-  setTimeout(()=>{launchRider();scheduleRider();},8000+Math.random()*14000);}
+  setTimeout(()=>{ launchRider(); scheduleRider(); }, 8000+Math.random()*14000);
+}
 scheduleRider();
 
 // ══════════════════════════════════════
-// BTC BLOCK MINER GAME
+// BTC BLOCK MINER
 // ══════════════════════════════════════
-const mc = document.getElementById('minerCanvas');
-const mctx = mc.getContext('2d');
-let MCW, MCH;
+const mcCanvas = document.getElementById('minerCanvas');
+const mctx = mcCanvas ? mcCanvas.getContext('2d') : null;
+let MCW=500, MCH=400;
 let mMoto=0, mBlocks=0, mHashRate=1, mAutoRate=0;
-let mBlk=[], mParticles=[], mRaf2=null;
-let mRunning=false;
+let mBlk=[], mParticles=[], mRaf2=null, mRunning=false;
+
 const UPGRADES=[
-  {name:'GPU Rig',baseCost:50,costMult:2.5,hashBoost:3,autoBoost:0.5,level:0,maxLevel:5},
-  {name:'ASIC Miner',baseCost:200,costMult:3,hashBoost:8,autoBoost:2,level:0,maxLevel:5},
-  {name:'Mining Farm',baseCost:1000,costMult:3.5,hashBoost:25,autoBoost:8,level:0,maxLevel:5},
-  {name:'Satellite Rig',baseCost:5000,costMult:4,hashBoost:80,autoBoost:30,level:0,maxLevel:3},
+  {name:'GPU Rig',      baseCost:50,   costMult:2.5, hashBoost:3,  autoBoost:0.5, level:0, maxLevel:5},
+  {name:'ASIC Miner',   baseCost:200,  costMult:3,   hashBoost:8,  autoBoost:2,   level:0, maxLevel:5},
+  {name:'Mining Farm',  baseCost:1000, costMult:3.5, hashBoost:25, autoBoost:8,   level:0, maxLevel:5},
+  {name:'Satellite Rig',baseCost:5000, costMult:4,   hashBoost:80, autoBoost:30,  level:0, maxLevel:3},
 ];
 
+const BLK_COLS={btc:'#f7931a',moto:'#7c3aed',pill:'#10b981',op20:'#3b82f6',cat:'#ec4899'};
+const BLK_LBL ={btc:'₿',     moto:'M',       pill:'P',      op20:'OP',     cat:'🐱'};
+const BLK_PTS ={btc:500,     moto:200,        pill:100,      op20:150,      cat:1000};
+
 function resizeMC(){
-  MCW=mc.offsetWidth||500;MCH=400;mc.width=MCW;mc.height=MCH;
+  if(!mcCanvas) return;
+  MCW=mcCanvas.offsetWidth||500; MCH=400;
+  mcCanvas.width=MCW; mcCanvas.height=MCH;
 }
 
 function initMiner(){
+  if(!mcCanvas) return;
   resizeMC();
   mBlk=[];
-  // Generate initial grid of blocks
-  const cols=5,rows=3,bw=Math.floor((MCW-60)/cols),bh=70;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    mBlk.push({
-      x:30+c*bw,y:30+r*(bh+12),w:bw-8,h:bh,
-      hp:3,maxHp:3,
-      type:['btc','moto','pill','op20','cat'][Math.floor(Math.random()*5)],
-      crack:0,flash:0
-    });
+  const types=['btc','moto','pill','op20','cat'];
+  const cols=5, bw=Math.floor((MCW-60)/cols), bh=64, gap=10;
+  const rows=3;
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const t=types[Math.floor(Math.random()*types.length)];
+      mBlk.push({x:30+c*bw, y:28+r*(bh+gap), w:bw-8, h:bh, hp:3, maxHp:3, type:t, crack:0, flash:0});
+    }
   }
   mParticles=[];
-  if(!mRunning){mRunning=true;minerLoop();}
+  if(!mRunning){ mRunning=true; minerLoop(); }
 }
-
-const BLK_COLS={btc:'#f7931a',moto:'#7c3aed',pill:'#10b981',op20:'#3b82f6',cat:'#ec4899'};
-const BLK_LBL={btc:'₿',moto:'M',pill:'P',op20:'OP',cat:'🐱'};
-const BLK_PTS={btc:500,moto:200,pill:100,op20:150,cat:1000};
 
 function minerLoop(){
   mRaf2=requestAnimationFrame(minerLoop);
-  // Auto-mine
   if(mAutoRate>0&&Math.random()<mAutoRate/60){
     const alive=mBlk.filter(b=>b.hp>0);
-    if(alive.length>0){mineBlock(alive[Math.floor(Math.random()*alive.length)],false);}
+    if(alive.length>0) mineBlock(alive[Math.floor(Math.random()*alive.length)]);
   }
-  // Respawn if all dead
-  if(mBlk.every(b=>b.hp<=0)){initMiner();}
+  if(mBlk.every(b=>b.hp<=0)) initMiner();
   drawMiner();
 }
 
-function mineBlock(b,click=true){
-  if(b.hp<=0)return;
+function mineBlock(b){
+  if(!b||b.hp<=0) return;
   b.hp--; b.crack=1-b.hp/b.maxHp; b.flash=8;
-  // Particles
   for(let i=0;i<6;i++){
     mParticles.push({
-      x:b.x+b.w/2,y:b.y+b.h/2,
-      vx:(Math.random()-0.5)*6,vy:(Math.random()-0.7)*7,
-      life:30,col:BLK_COLS[b.type],
-      txt:i===0?'+'+BLK_PTS[b.type]:null
+      x:b.x+b.w/2, y:b.y+b.h/2,
+      vx:(Math.random()-0.5)*6, vy:(-0.7-Math.random())*5,
+      life:30, col:BLK_COLS[b.type],
+      txt: i===0 ? '+'+BLK_PTS[b.type] : null
     });
   }
   if(b.hp<=0){
-    const earned=BLK_PTS[b.type]*Math.ceil(mHashRate/5);
+    const earned=BLK_PTS[b.type]*Math.max(1,Math.ceil(mHashRate/5));
     mMoto+=earned; mBlocks++;
-    document.getElementById('mMined').textContent=mMoto.toLocaleString();
-    document.getElementById('mBlocks').textContent=mBlocks;
+    const el=document.getElementById('mMined'); if(el) el.textContent=mMoto.toLocaleString();
+    const bl=document.getElementById('mBlocks'); if(bl) bl.textContent=mBlocks;
     updateUpgradeUI();
   }
 }
 
 function drawMiner(){
+  if(!mctx) return;
   mctx.clearRect(0,0,MCW,MCH);
-  mctx.fillStyle='#02020a';mctx.fillRect(0,0,MCW,MCH);
-  // Grid bg
-  mctx.strokeStyle='rgba(247,147,26,0.04)';
+  mctx.fillStyle='#02020a'; mctx.fillRect(0,0,MCW,MCH);
+  mctx.strokeStyle='rgba(247,147,26,0.04)'; mctx.lineWidth=1;
   for(let x=0;x<MCW;x+=30){mctx.beginPath();mctx.moveTo(x,0);mctx.lineTo(x,MCH);mctx.stroke();}
   for(let y=0;y<MCH;y+=30){mctx.beginPath();mctx.moveTo(0,y);mctx.lineTo(MCW,y);mctx.stroke();}
 
-  // Blocks
   mBlk.forEach(b=>{
-    if(b.hp<=0)return;
-    const col=BLK_COLS[b.type];
-    const flash=b.flash>0;
+    if(b.hp<=0) return;
+    const col=BLK_COLS[b.type], fl=b.flash>0;
     mctx.save();
-    mctx.shadowColor=col;mctx.shadowBlur=flash?20:6;
-    mctx.fillStyle=flash?'#fff':col;
-    mctx.beginPath();mctx.roundRect(b.x,b.y,b.w,b.h,8);mctx.fill();
-    // HP bar
-    mctx.fillStyle='rgba(0,0,0,0.5)';mctx.beginPath();mctx.roundRect(b.x+4,b.y+b.h-12,b.w-8,8,3);mctx.fill();
-    mctx.fillStyle='rgba(255,255,255,0.8)';mctx.beginPath();mctx.roundRect(b.x+4,b.y+b.h-12,(b.w-8)*(b.hp/b.maxHp),8,3);mctx.fill();
-    // Cracks
+    mctx.shadowColor=col; mctx.shadowBlur=fl?20:6;
+    mctx.fillStyle=fl?'#ffffff':col;
+    mctx.beginPath(); mctx.roundRect(b.x,b.y,b.w,b.h,8); mctx.fill();
+    // hp bar bg
+    mctx.fillStyle='rgba(0,0,0,0.45)';
+    mctx.beginPath(); mctx.roundRect(b.x+4,b.y+b.h-12,b.w-8,8,3); mctx.fill();
+    // hp bar fill
+    mctx.fillStyle='rgba(255,255,255,0.75)';
+    mctx.beginPath(); mctx.roundRect(b.x+4,b.y+b.h-12,(b.w-8)*(b.hp/b.maxHp),8,3); mctx.fill();
+    // cracks
     if(b.crack>0){
-      mctx.strokeStyle='rgba(0,0,0,0.5)';mctx.lineWidth=1.5;
-      mctx.beginPath();mctx.moveTo(b.x+b.w*0.4,b.y+b.h*0.3);mctx.lineTo(b.x+b.w*0.6,b.y+b.h*0.7);mctx.stroke();
+      mctx.strokeStyle='rgba(0,0,0,0.45)'; mctx.lineWidth=1.5; mctx.shadowBlur=0;
+      mctx.beginPath(); mctx.moveTo(b.x+b.w*0.4,b.y+b.h*0.3); mctx.lineTo(b.x+b.w*0.6,b.y+b.h*0.7); mctx.stroke();
       if(b.crack>0.5){mctx.beginPath();mctx.moveTo(b.x+b.w*0.5,b.y+b.h*0.2);mctx.lineTo(b.x+b.w*0.3,b.y+b.h*0.8);mctx.stroke();}
     }
-    // Label
-    mctx.fillStyle=flash?col:'rgba(0,0,0,0.85)';
-    mctx.font=`bold 20px Syne,sans-serif`;mctx.textAlign='center';mctx.textBaseline='middle';
-    mctx.shadowBlur=0;mctx.fillText(BLK_LBL[b.type],b.x+b.w/2,b.y+b.h/2-4);
-    if(b.flash>0)b.flash--;
+    // label
+    mctx.fillStyle=fl?col:'rgba(0,0,0,0.85)';
+    mctx.font='bold 20px sans-serif'; mctx.textAlign='center'; mctx.textBaseline='middle';
+    mctx.shadowBlur=0;
+    mctx.fillText(BLK_LBL[b.type], b.x+b.w/2, b.y+b.h/2-4);
+    if(b.flash>0) b.flash--;
     mctx.restore();
   });
 
-  // Particles
-  mParticles.forEach((p,i)=>{
-    p.x+=p.vx;p.y+=p.vy;p.vy+=0.3;p.life--;
-    const a=p.life/30;
+  mParticles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.3; p.life--;
+    const a=Math.max(0,p.life/30);
     if(p.txt){
-      mctx.fillStyle=`rgba(255,255,255,${a})`;
-      mctx.font='bold 13px Space Mono,monospace';mctx.textAlign='center';
+      mctx.globalAlpha=a;
+      mctx.fillStyle='#ffffff';
+      mctx.font='bold 13px monospace'; mctx.textAlign='center';
       mctx.fillText(p.txt,p.x,p.y);
+      mctx.globalAlpha=1;
     } else {
-      mctx.fillStyle=p.col+Math.floor(a*255).toString(16).padStart(2,'0');
-      mctx.beginPath();mctx.arc(p.x,p.y,3*a,0,Math.PI*2);mctx.fill();
+      const hex=Math.floor(a*255).toString(16).padStart(2,'0');
+      mctx.fillStyle=p.col+hex;
+      mctx.beginPath(); mctx.arc(p.x,p.y,Math.max(0.5,3*a),0,Math.PI*2); mctx.fill();
     }
   });
   mParticles=mParticles.filter(p=>p.life>0);
 
-  // Hash rate bar at bottom
+  // hash bar
   const hPct=Math.min(mHashRate/500,1);
-  mctx.fillStyle='rgba(255,255,255,0.05)';mctx.fillRect(0,MCH-8,MCW,8);
-  mctx.fillStyle='#f7931a';mctx.fillRect(0,MCH-8,MCW*hPct,8);
-  document.getElementById('mHash').textContent=mHashRate>1000?(mHashRate/1000).toFixed(1)+' KH/s':mHashRate+' H/s';
-  document.getElementById('hashFill').style.width=hPct*100+'%';
+  mctx.fillStyle='rgba(255,255,255,0.05)'; mctx.fillRect(0,MCH-8,MCW,8);
+  mctx.fillStyle='#f7931a'; mctx.fillRect(0,MCH-8,MCW*hPct,8);
+
+  const mhEl=document.getElementById('mHash');
+  if(mhEl) mhEl.textContent=mHashRate>=1000?(mHashRate/1000).toFixed(1)+' KH/s':mHashRate+' H/s';
+  const hfEl=document.getElementById('hashFill');
+  if(hfEl) hfEl.style.width=(hPct*100)+'%';
 }
 
-mc.addEventListener('click',e=>{
-  const rect=mc.getBoundingClientRect();
-  const mx=(e.clientX-rect.left)*(MCW/rect.width);
-  const my=(e.clientY-rect.top)*(MCH/rect.height);
-  mBlk.forEach(b=>{
-    if(b.hp>0&&mx>b.x&&mx<b.x+b.w&&my>b.y&&my<b.y+b.h)mineBlock(b,true);
+if(mcCanvas){
+  mcCanvas.addEventListener('click',e=>{
+    const rect=mcCanvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)*(MCW/rect.width);
+    const my=(e.clientY-rect.top)*(MCH/rect.height);
+    let hit=false;
+    mBlk.forEach(b=>{ if(b.hp>0&&mx>b.x&&mx<b.x+b.w&&my>b.y&&my<b.y+b.h){ mineBlock(b); hit=true; }});
+    for(let i=0;i<4;i++) mParticles.push({x:mx,y:my,vx:(Math.random()-0.5)*5,vy:-2-Math.random()*3,life:20,col:'#f7931a',txt:i===0?'⛏️':null});
   });
-  // click burst
-  for(let i=0;i<4;i++)mParticles.push({x:mx,y:my,vx:(Math.random()-0.5)*5,vy:-2-Math.random()*3,life:20,col:'#f7931a',txt:i===0?'⛏️':null});
-});
-mc.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  const rect=mc.getBoundingClientRect();
-  Array.from(e.touches).forEach(t=>{
-    const mx=(t.clientX-rect.left)*(MCW/rect.width);
-    const my=(t.clientY-rect.top)*(MCH/rect.height);
-    mBlk.forEach(b=>{if(b.hp>0&&mx>b.x&&mx<b.x+b.w&&my>b.y&&my<b.y+b.h)mineBlock(b,true);});
-  });
-},{passive:false});
+  mcCanvas.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const rect=mcCanvas.getBoundingClientRect();
+    Array.from(e.touches).forEach(t=>{
+      const mx=(t.clientX-rect.left)*(MCW/rect.width);
+      const my=(t.clientY-rect.top)*(MCH/rect.height);
+      mBlk.forEach(b=>{ if(b.hp>0&&mx>b.x&&mx<b.x+b.w&&my>b.y&&my<b.y+b.h) mineBlock(b); });
+    });
+  },{passive:false});
+}
 
 function buyUpgrade(idx){
   const u=UPGRADES[idx];
   const cost=Math.floor(u.baseCost*Math.pow(u.costMult,u.level));
-  if(mMoto<cost||u.level>=u.maxLevel)return;
+  if(mMoto<cost||u.level>=u.maxLevel) return;
   mMoto-=cost; u.level++;
   mHashRate+=u.hashBoost; mAutoRate+=u.autoBoost;
-  document.getElementById('mMined').textContent=mMoto.toLocaleString();
-  toast(`⚡ ${u.name} upgraded to Lv${u.level}!`,'success');
+  const el=document.getElementById('mMined'); if(el) el.textContent=mMoto.toLocaleString();
+  toast('⚡ '+u.name+' upgraded to Lv'+u.level+'!','success');
   updateUpgradeUI();
 }
 
@@ -1654,40 +1511,39 @@ function updateUpgradeUI(){
     const cost=Math.floor(u.baseCost*Math.pow(u.costMult,u.level));
     const btn=document.getElementById('upg'+i);
     const costEl=document.getElementById('upg'+i+'cost');
-    if(btn){
-      btn.disabled=(mMoto<cost||u.level>=u.maxLevel);
-      if(costEl)costEl.textContent=u.level>=u.maxLevel?'MAX':cost.toLocaleString()+' MOTO';
-      btn.querySelector('span').textContent=(u.level>0?'★'.repeat(u.level)+' ':'')+u.name;
-    }
+    if(!btn) return;
+    btn.disabled=(mMoto<cost||u.level>=u.maxLevel);
+    if(costEl) costEl.textContent=u.level>=u.maxLevel?'MAX':cost.toLocaleString()+' MOTO';
+    const nameSpan=btn.querySelector('span:first-child');
+    if(nameSpan) nameSpan.textContent=(u.level>0?'★'.repeat(u.level)+' ':'')+u.name;
   });
 }
 
 function resetMiner(){
   UPGRADES.forEach(u=>{u.level=0;});
-  mMoto=0;mBlocks=0;mHashRate=1;mAutoRate=0;
-  document.getElementById('mMined').textContent='0';
-  document.getElementById('mBlocks').textContent='0';
-  updateUpgradeUI();initMiner();
+  mMoto=0; mBlocks=0; mHashRate=1; mAutoRate=0;
+  const el=document.getElementById('mMined'); if(el) el.textContent='0';
+  const bl=document.getElementById('mBlocks'); if(bl) bl.textContent='0';
+  updateUpgradeUI(); initMiner();
 }
 
 // ══════════════════════════════════════
 // FAKE LIVE TX TICKER
 // ══════════════════════════════════════
 const addrPool=['bcrt1p...a1f2','bcrt1q...9c3d','bcrt1p...7e88','bcrt1q...2b14','bcrt1p...ff01'];
-const tokPairs=['rBTC→MOTO','MOTO→PILL','PILL→rBTC','WBTC→rBTC','rBTC→WBTC','MOTO→rBTC'];
 const amts=['0.001 rBTC','420 MOTO','1,200 PILL','0.0042 rBTC','890 MOTO'];
 let txTick=0;
 setInterval(()=>{
   txTick++;
-  const txs=document.getElementById('recentTxs');
-  if(!txs) return;
-  const div=document.createElement('div');
-  div.className='tx-item';
+  const txs=document.getElementById('recentTxs'); if(!txs) return;
+  const div=document.createElement('div'); div.className='tx-item';
   const isIn=Math.random()>0.4;
-  div.innerHTML=`<div class="tx-dot" style="background:${isIn?'var(--green)':'var(--moto)'}"></div><div class="tx-addr">${addrPool[txTick%5]}</div><div class="tx-amt">${amts[txTick%5]}</div><div class="tx-time">just now</div>`;
+  div.innerHTML='<div class="tx-dot" style="background:'+(isIn?'#00d68f':'#7c3aed')+'"></div>'
+    +'<div class="tx-addr">'+addrPool[txTick%5]+'</div>'
+    +'<div class="tx-amt">'+amts[txTick%5]+'</div>'
+    +'<div class="tx-time">just now</div>';
   txs.insertBefore(div,txs.firstChild);
   if(txs.children.length>6) txs.removeChild(txs.lastChild);
-  // Update ages
   Array.from(txs.querySelectorAll('.tx-time')).forEach((t,i)=>{
     if(i>0) t.textContent=['5s ago','15s ago','30s ago','1m ago','2m ago'][i-1]||'2m+ ago';
   });
@@ -1696,51 +1552,61 @@ setInterval(()=>{
 // ══════════════════════════════════════
 // QUOTES TICKER
 // ══════════════════════════════════════
-const QUOTES = [
-  {text:"Bitcoin finally has the DeFi layer it always deserved. OP_NET changes everything.", author:"@cryptonaut_btc", tag:"Community"},
-  {text:"MotoSwap is the first true AMM on Bitcoin L1 — no bridges, no wrapping, pure Bitcoin.", author:"@defi_maxi", tag:"MotoSwap"},
-  {text:"Staking my MotoCats and earning real yield directly on Bitcoin. This is the future.", author:"@nft_rider99", tag:"MotoCats"},
-  {text:"OP_20 tokens on Bitcoin L1 are a paradigm shift. AssemblyScript smart contracts are live.", author:"@buildonbtc", tag:"Dev"},
-  {text:"The MotoSwap liquidity pools are growing fast. 38% APY with real Bitcoin security beneath.", author:"@yield_farmer_btc", tag:"DeFi"},
-  {text:"No more ETH gas wars. OP_NET brings DeFi home — to Bitcoin, where it belongs.", author:"@satoshi_descendent", tag:"Community"},
-  {text:"MotoCats NFTs with on-chain utility and real yield. Finally an NFT project that delivers.", author:"@nft_defi_degen", tag:"MotoCats"},
-  {text:"OP_NET's cryptographic proof system means every transaction is verifiable on Bitcoin's chain.", author:"@btc_security_nerd", tag:"Tech"},
-  {text:"The $MOTO token ecosystem is one of the most thoughtfully designed tokenomics in Bitcoin DeFi.", author:"@tokenomics_pro", tag:"MOTO"},
-  {text:"MotoChef farming rewards with Bitcoin-level security? That's not DeFi — that's DeFi done right.", author:"@chef_btc", tag:"Farm"},
-  {text:"Building on OP_NET feels like building on Ethereum circa 2020 — except it's Bitcoin.", author:"@dev_on_btc", tag:"Dev"},
-  {text:"The OP_WALLET extension makes interacting with Bitcoin smart contracts as easy as MetaMask.", author:"@ux_defi", tag:"Wallet"},
-  {text:"DeFiBible is the resource the Bitcoin DeFi ecosystem needed. Everything in one place.", author:"@knowledge_seeker", tag:"Docs"},
-  {text:"Cross-chain is overrated. Native Bitcoin DeFi with OP_NET is the real endgame.", author:"@btc_maximalist_defi", tag:"Community"},
-  {text:"Swapping OP_20 tokens on MotoSwap with 0.3% fees and Bitcoin finality. No compromise.", author:"@low_fee_trader", tag:"MotoSwap"},
+const QUOTES=[
+  {text:"Bitcoin finally has the DeFi layer it always deserved. OP_NET changes everything.",              author:"@cryptonaut_btc",    tag:"Community"},
+  {text:"MotoSwap is the first true AMM on Bitcoin L1 — no bridges, no wrapping, pure Bitcoin.",         author:"@defi_maxi",         tag:"MotoSwap"},
+  {text:"Staking my MotoCats and earning real yield directly on Bitcoin. This is the future.",            author:"@nft_rider99",       tag:"MotoCats"},
+  {text:"OP_20 tokens on Bitcoin L1 are a paradigm shift. AssemblyScript smart contracts are live.",     author:"@buildonbtc",        tag:"Dev"},
+  {text:"The MotoSwap liquidity pools are growing fast. 38% APY with real Bitcoin security beneath.",    author:"@yield_farmer_btc",  tag:"DeFi"},
+  {text:"No more ETH gas wars. OP_NET brings DeFi home — to Bitcoin, where it belongs.",                 author:"@satoshi_descendent",tag:"Community"},
+  {text:"MotoCats NFTs with on-chain utility and real yield. Finally an NFT project that delivers.",     author:"@nft_defi_degen",    tag:"MotoCats"},
+  {text:"OP_NET cryptographic proofs mean every transaction is verifiable on Bitcoin's chain.",          author:"@btc_security_nerd", tag:"Tech"},
+  {text:"The $MOTO token ecosystem is one of the most thoughtfully designed in Bitcoin DeFi.",           author:"@tokenomics_pro",    tag:"MOTO"},
+  {text:"MotoChef farming rewards with Bitcoin-level security. That's DeFi done right.",                 author:"@chef_btc",          tag:"Farm"},
+  {text:"Building on OP_NET feels like building on Ethereum circa 2020 — except it's Bitcoin.",          author:"@dev_on_btc",        tag:"Dev"},
+  {text:"The OP_WALLET extension makes interacting with Bitcoin smart contracts as easy as MetaMask.",   author:"@ux_defi",           tag:"Wallet"},
+  {text:"DeFiBible is the resource the Bitcoin DeFi ecosystem needed. Everything in one place.",         author:"@knowledge_seeker",  tag:"Docs"},
+  {text:"Cross-chain is overrated. Native Bitcoin DeFi with OP_NET is the real endgame.",               author:"@btc_maximalist_defi",tag:"Community"},
+  {text:"Swapping OP_20 tokens on MotoSwap with 0.3% fees and Bitcoin finality. No compromise.",        author:"@low_fee_trader",    tag:"MotoSwap"},
 ];
 
-function buildQuotes() {
-  const track = document.getElementById('quoteTrack');
+function buildQuotes(){
+  const track=document.getElementById('quoteTrack');
   if(!track) return;
-  // Double for seamless loop
-  const all = [...QUOTES, ...QUOTES];
-  track.innerHTML = all.map(q => `
-    <div class="quote-card">
-      <div class="quote-text">${q.text}</div>
-      <div class="quote-author"><em>${q.author}</em> · ${q.tag}</div>
-    </div>
-  `).join('');
+  const all=[...QUOTES,...QUOTES];
+  track.innerHTML=all.map(q=>
+    '<div class="quote-card">'
+    +'<div class="quote-text">'+q.text+'</div>'
+    +'<div class="quote-author"><em>'+q.author+'</em> · '+q.tag+'</div>'
+    +'</div>'
+  ).join('');
+  // force reflow then set animation
+  track.style.animation='none';
+  track.offsetHeight; // reflow
+  track.style.animation='';
 }
 
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
-window.addEventListener('resize',()=>{resizePB();if(pbState==='idle')pbDraw();resizeMC();});
+window.addEventListener('resize',()=>{
+  resizePB(); if(pbState==='idle') pbDraw();
+  resizeMC();
+});
+
 fetchPrices();
-setInterval(fetchPrices, 60000);
-loadBtcChart('7');
+setInterval(fetchPrices,60000);
+
 pbInit();
 pbDraw();
 renderPbLB();
-buildQuotes();
+
 resizeMC();
 initMiner();
 updateUpgradeUI();
+
+buildQuotes();
+
 </script>
 </body>
 </html>
