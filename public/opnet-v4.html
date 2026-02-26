@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP_NET — Bitcoin DeFi Hub · Wallet Copilot · MotoSwap</title>
+<meta name="description" content="The ultimate Bitcoin L1 DeFi dashboard. Live BTC & MOTO charts, swap widget, wallet copilot, MotoCat pinball game and full OP_NET ecosystem.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --btc:#f7931a; --opnet:#ff6b2b; --dark:#080810; --card:#0f0f1a;
+  --card2:#13131f; --border:rgba(247,147,26,0.15); --glow:rgba(247,147,26,0.1);
+  --text:#e8e8f4; --muted:#5a5a72; --green:#00d68f; --red:#ff3d5a;
+  --moto:#7c3aed; --cat:#ec4899; --pill:#10b981;
+  --gold:#fbbf24; --blue:#3b82f6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* animated bg */
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(247,147,26,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(247,147,26,0.025) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;animation:bgPan 60s linear infinite;}
+@keyframes bgPan{from{background-position:0 0}to{background-position:48px 48px}}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(124,58,237,0.08),transparent),
+             radial-gradient(ellipse 60% 40% at 90% 80%,rgba(247,147,26,0.06),transparent);}
+
+/* ══ TOPBAR ══ */
+.topbar{position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:12px;
+  padding:0 20px;height:50px;background:rgba(8,8,16,0.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#fff;flex-shrink:0;}
+.logo em{color:var(--btc);font-style:normal;}
+.pill{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+  font-family:'Space Mono',monospace;font-size:11px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.pill-btc{border-color:rgba(247,147,26,0.35);background:rgba(247,147,26,0.08);color:var(--btc);}
+.pill-moto{border-color:rgba(124,58,237,0.35);background:rgba(124,58,237,0.08);color:#a78bfa;}
+.pill .chg{font-size:10px;}
+.pill .chg.up{color:var(--green);}
+.pill .chg.dn{color:var(--red);}
+nav{display:flex;gap:2px;margin-left:auto;}
+nav a{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;transition:.15s;}
+nav a:hover,nav a.on{color:var(--btc);}
+.conn-btn{padding:6px 14px;background:linear-gradient(135deg,var(--btc),var(--opnet));color:#000;
+  border:none;border-radius:7px;font-weight:800;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;
+  transition:.15s;flex-shrink:0;}
+.conn-btn:hover{opacity:.85;transform:translateY(-1px);}
+
+/* ══ LAYOUT ══ */
+.pg{position:relative;z-index:1;}
+.wrap{max-width:1220px;margin:0 auto;padding:0 20px;}
+.sec-title{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);
+  margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ══ HERO ══ */
+.hero{padding:56px 20px 36px;max-width:1220px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,7vw,88px);line-height:.95;
+  letter-spacing:2px;color:#fff;}
+.hero-h1 em{font-style:normal;color:var(--btc);}
+.hero-sub{color:var(--muted);font-size:14px;margin-top:14px;line-height:1.7;max-width:420px;}
+.hero-btns{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+.btn-o{padding:10px 22px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;
+  font-family:'Syne',sans-serif;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-solid{background:linear-gradient(135deg,var(--btc),#ff8c00);color:#000;border:none;}
+.btn-solid:hover{opacity:.85;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--moto);color:#a78bfa;}
+.btn-pink{background:transparent;color:var(--cat);border:1px solid rgba(236,72,153,0.35);}
+.btn-pink:hover{background:rgba(236,72,153,0.1);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;
+  position:relative;overflow:hidden;transition:.2s;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--btc),transparent);}
+.sc:hover{border-color:rgba(247,147,26,0.35);transform:translateY(-2px);}
+.sc-lbl{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.sc-val{font-size:20px;font-weight:800;margin-top:6px;color:#fff;font-family:'Space Mono',monospace;}
+.sc-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.sc-sub.up{color:var(--green);}
+.sc-sub.dn{color:var(--red);}
+
+/* ══ HERO DEFI FLASH ══ */
+.hero-defi{
+  font-style:normal;color:var(--btc);position:relative;display:inline-block;
+  animation:defiPulse 3s ease-in-out infinite;
+}
+@keyframes defiPulse{
+  0%,100%{color:var(--btc);text-shadow:0 0 20px rgba(247,147,26,0.4);}
+  20%{color:#fff;text-shadow:0 0 40px rgba(247,147,26,1),0 0 80px rgba(247,147,26,0.6),0 0 120px rgba(255,140,0,0.4);}
+  22%{color:var(--btc);text-shadow:0 0 10px rgba(247,147,26,0.2);}
+  40%{color:#ffe0a0;text-shadow:0 0 30px rgba(247,147,26,0.8),0 0 60px rgba(247,147,26,0.4);}
+  60%{color:var(--btc);text-shadow:0 0 20px rgba(247,147,26,0.3);}
+  80%{color:#fff;text-shadow:0 0 35px rgba(247,147,26,0.9),0 0 70px rgba(255,100,0,0.5);}
+  82%{color:var(--cat);text-shadow:0 0 8px rgba(236,72,153,0.6);}
+  84%{color:var(--btc);text-shadow:0 0 20px rgba(247,147,26,0.5);}
+}
+
+/* ══ MOTOCAT RIDER ══ */
+#motoRider{
+  position:fixed;bottom:80px;left:-160px;z-index:50;
+  pointer-events:none;font-size:0;line-height:1;
+  filter:drop-shadow(0 0 8px rgba(247,147,26,0.7));
+  transition:none;
+}
+#motoRider.riding{animation:rideAcross 5s linear forwards;}
+@keyframes rideAcross{
+  from{left:-160px;bottom:80px;}
+  to{left:calc(100vw + 160px);bottom:80px;}
+}
+#motoRider canvas{display:block;}
+
+/* ══ SECOND GAME — BTC MINER ══ */
+.miner-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;position:relative;overflow:hidden;margin-top:16px;}
+.miner-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--btc),var(--green),var(--moto));}
+.miner-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:2px;}
+.miner-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.miner-layout{display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:start;}
+#minerCanvas{display:block;border-radius:10px;border:1px solid var(--border);
+  background:#02020a;cursor:crosshair;width:100%;}
+.miner-panel{display:flex;flex-direction:column;gap:10px;}
+.mp-stat{background:rgba(247,147,26,0.07);border:1px solid rgba(247,147,26,0.2);
+  border-radius:10px;padding:12px;text-align:center;}
+.mp-stat-lbl{font-size:10px;color:var(--btc);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.mp-stat-val{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#fff;line-height:1;}
+.mp-upgrade{background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;}
+.mp-upgrade h4{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.upgrade-btn{width:100%;padding:7px 10px;border-radius:6px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Syne',sans-serif;transition:.15s;border:none;
+  background:rgba(247,147,26,0.15);color:var(--btc);border:1px solid rgba(247,147,26,0.3);
+  margin-bottom:5px;text-align:left;display:flex;justify-content:space-between;align-items:center;}
+.upgrade-btn:hover:not(:disabled){background:rgba(247,147,26,0.25);}
+.upgrade-btn:disabled{opacity:.35;cursor:not-allowed;}
+.upgrade-btn .ub-cost{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);}
+.hashbar{height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:4px;}
+.hashfill{height:100%;background:linear-gradient(90deg,var(--btc),var(--green));border-radius:4px;transition:.1s;}
+
+/* ══ SINGLE CHART ══ */
+.charts-row{padding:0 20px 32px;max-width:1220px;margin:0 auto;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden;}
+.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.chart-card.btc-card::before{background:linear-gradient(90deg,var(--btc),#ff8c00,transparent);}
+.cc-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.cc-name{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.cc-price{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1;}
+.cc-chg{font-size:11px;padding:2px 7px;border-radius:4px;font-weight:700;font-family:'Space Mono',monospace;margin-top:4px;display:inline-block;}
+.cc-chg.up{background:rgba(0,214,143,0.15);color:var(--green);}
+.cc-chg.dn{background:rgba(255,61,90,0.15);color:var(--red);}
+.chart-tabs{display:flex;gap:3px;margin-left:auto;}
+.ctab{padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;background:transparent;
+  border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;transition:.12s;}
+.ctab.on,.ctab:hover{background:var(--btc);color:#000;border-color:var(--btc);}
+.moto-card .ctab.on,.moto-card .ctab:hover{background:var(--moto);color:#fff;border-color:var(--moto);}
+.cc-foot{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.cc-stat{font-size:11px;}
+.cc-stat span{color:var(--muted);margin-right:3px;}
+.cc-stat b{font-family:'Space Mono',monospace;}
+
+/* ══ SWAP WIDGET ══ */
+.swap-section{padding:0 20px 32px;max-width:1220px;margin:0 auto;}
+.swap-grid{display:grid;grid-template-columns:380px 1fr;gap:16px;}
+.swap-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;overflow:hidden;}
+.swap-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--moto),var(--cat),var(--btc));}
+.sw-title{font-size:17px;font-weight:800;margin-bottom:4px;}
+.sw-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.sw-box{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;transition:.2s;}
+.sw-box:focus-within{border-color:rgba(124,58,237,0.5);background:rgba(124,58,237,0.04);}
+.sw-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.sw-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;flex:1;}
+.sw-max{font-size:10px;color:var(--moto);cursor:pointer;font-weight:700;}
+.sw-max:hover{text-decoration:underline;}
+.sw-inner{display:flex;align-items:center;gap:8px;}
+.sw-input{flex:1;background:transparent;border:none;outline:none;font-family:'Space Mono',monospace;
+  font-size:22px;font-weight:700;color:#fff;min-width:0;}
+.sw-input::placeholder{color:#2a2a40;}
+.tok-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);
+  border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;
+  font-weight:700;font-size:13px;white-space:nowrap;transition:.15s;color:var(--text);}
+.tok-btn:hover{border-color:var(--moto);color:#a78bfa;}
+.tok-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;}
+.tok-btc{background:#f7931a;color:#000;}
+.tok-moto{background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;}
+.tok-pill{background:#10b981;color:#000;}
+.tok-rbtc{background:#2a2a50;color:#f7931a;}
+.sw-arrow-row{display:flex;justify-content:center;margin:4px 0;}
+.sw-arrow{width:32px;height:32px;background:var(--card2);border:1px solid var(--border);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-size:14px;transition:.2s;}
+.sw-arrow:hover{background:rgba(124,58,237,0.2);border-color:var(--moto);transform:rotate(180deg);}
+.sw-rate{font-size:12px;color:var(--muted);text-align:center;margin:10px 0;font-family:'Space Mono',monospace;}
+.sw-rate b{color:var(--text);}
+.sw-details{background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;}
+.sw-detail-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;}
+.sw-detail-row span{color:var(--muted);}
+.sw-detail-row b{font-family:'Space Mono',monospace;font-size:11px;}
+.sw-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--moto),var(--cat));color:#fff;
+  border:none;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;
+  font-family:'Syne',sans-serif;transition:.15s;letter-spacing:.5px;}
+.sw-btn:hover{opacity:.88;transform:translateY(-1px);}
+.sw-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.sw-btn.loading{animation:swPulse 1s infinite;}
+@keyframes swPulse{50%{opacity:.6;}}
+.sw-notice{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;}
+.sw-notice a{color:var(--moto);text-decoration:none;}
+/* Token dropdown */
+.tok-dropdown{position:absolute;top:100%;right:0;z-index:50;background:#0f0f1a;
+  border:1px solid var(--border);border-radius:10px;padding:8px;min-width:180px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);display:none;}
+.tok-dropdown.open{display:block;}
+.tok-opt{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;
+  cursor:pointer;font-size:13px;font-weight:600;transition:.12s;}
+.tok-opt:hover{background:rgba(255,255,255,0.06);}
+.tok-pos-rel{position:relative;}
+/* Swap info panel */
+.swap-info{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.si-title{font-size:15px;font-weight:800;margin-bottom:16px;}
+.pool-list{display:flex;flex-direction:column;gap:8px;}
+.pool-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.pool-pair{font-size:13px;font-weight:700;margin-bottom:4px;}
+.pool-stats{display:flex;gap:16px;flex-wrap:wrap;}
+.pool-stat{font-size:11px;}
+.pool-stat span{color:var(--muted);}
+.pool-stat b{font-family:'Space Mono',monospace;color:var(--green);}
+.apy-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;
+  background:rgba(0,214,143,0.12);color:var(--green);font-family:'Space Mono',monospace;}
+.swap-tx{margin-top:16px;}
+.tx-title{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.tx-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;}
+.tx-item:last-child{border:none;}
+.tx-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.tx-addr{font-family:'Space Mono',monospace;color:var(--muted);font-size:11px;flex:1;}
+.tx-amt{font-family:'Space Mono',monospace;font-size:11px;color:var(--btc);}
+.tx-time{font-size:10px;color:var(--muted);}
+
+/* ══ WALLET COPILOT ══ */
+.copilot-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden;}
+.tc-h{font-size:15px;font-weight:800;margin-bottom:3px;display:flex;align-items:center;gap:7px;}
+.tc-s{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.inp-row{display:flex;gap:7px;}
+.addr-in{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:8px;padding:9px 12px;color:#fff;font-size:12px;outline:none;
+  font-family:'Space Mono',monospace;transition:.15s;}
+.addr-in:focus{border-color:var(--btc);background:rgba(247,147,26,0.04);}
+.addr-in::placeholder{color:var(--muted);}
+.go-btn{padding:9px 14px;background:var(--btc);color:#000;border:none;
+  border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;transition:.15s;white-space:nowrap;}
+.go-btn:hover{background:#ffab33;}
+.res-box{margin-top:12px;background:rgba(0,0,0,0.35);border:1px solid var(--border);
+  border-radius:8px;padding:12px;min-height:72px;font-size:12px;color:var(--muted);
+  font-family:'Space Mono',monospace;line-height:1.7;white-space:pre-wrap;}
+.ai-box{background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);
+  border-radius:10px;padding:12px;margin-top:10px;font-size:12px;line-height:1.6;display:none;}
+.ai-tag{color:#a78bfa;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.defi-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+.ds{background:rgba(255,255,255,0.03);border-radius:8px;padding:9px;text-align:center;}
+.ds-l{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.ds-v{font-size:14px;font-weight:800;}
+
+/* ══ ECOSYSTEM ══ */
+.eco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
+.eco-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;
+  padding:18px;text-decoration:none;color:var(--text);transition:.2s;position:relative;overflow:hidden;display:block;}
+.eco-card::after{content:'→';position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--border);font-size:16px;transition:.2s;}
+.eco-card:hover::after{color:var(--btc);right:10px;}
+.eco-card:hover{border-color:rgba(247,147,26,0.4);transform:translateY(-3px);
+  box-shadow:0 12px 32px rgba(0,0,0,0.4);}
+.eco-icon{font-size:26px;margin-bottom:10px;}
+.eco-nm{font-size:13px;font-weight:700;margin-bottom:3px;}
+.eco-ds{font-size:11px;color:var(--muted);line-height:1.5;}
+.eco-tg{display:inline-block;margin-top:8px;font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:2px 6px;border-radius:3px;text-transform:uppercase;}
+.tg-btc{background:rgba(247,147,26,0.12);color:var(--btc);}
+.tg-moto{background:rgba(124,58,237,0.15);color:#a78bfa;}
+.tg-cat{background:rgba(236,72,153,0.15);color:var(--cat);}
+.tg-green{background:rgba(0,214,143,0.12);color:var(--green);}
+.tg-gold{background:rgba(251,191,36,0.12);color:var(--gold);}
+
+/* ══ PINBALL GAME ══ */
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;position:relative;overflow:hidden;}
+.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--moto),var(--cat),var(--btc),var(--green));}
+.gm-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:2px;}
+.gm-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.game-layout{display:grid;grid-template-columns:1fr 220px;gap:16px;align-items:start;}
+#pb{display:block;border-radius:10px;border:1px solid var(--border);background:#04040e;cursor:pointer;width:100%;max-width:420px;}
+.game-panel{display:flex;flex-direction:column;gap:10px;}
+.gp-score{background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);
+  border-radius:10px;padding:14px;text-align:center;}
+.gp-score-lbl{font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.gp-score-val{font-family:'Bebas Neue',sans-serif;font-size:42px;color:#fff;line-height:1;}
+.gp-best{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.gp-lives{display:flex;gap:6px;justify-content:center;margin-top:6px;}
+.life-cat{font-size:16px;opacity:.3;transition:.3s;}
+.life-cat.alive{opacity:1;}
+.gm-btn{padding:10px;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;
+  font-family:'Syne',sans-serif;transition:.15s;border:none;width:100%;}
+.gm-start{background:linear-gradient(135deg,var(--moto),var(--cat));color:#fff;}
+.gm-start:hover{opacity:.85;}
+.gm-reset{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.gm-reset:hover{border-color:var(--cat);color:var(--cat);}
+.gm-instruct{background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;}
+.gm-instruct h4{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.gm-instruct p{font-size:11px;color:var(--muted);line-height:1.6;}
+.gm-instruct b{color:var(--text);}
+.multiplier-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.1);overflow:hidden;margin-top:6px;}
+.multiplier-fill{height:100%;background:linear-gradient(90deg,var(--btc),var(--cat));border-radius:3px;transition:.3s;}
+.mult-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;}
+/* Leaderboard */
+.lb-title{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.lb-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;}
+.lb-row:last-child{border:none;}
+.lb-rank{width:16px;text-align:center;font-weight:800;color:var(--muted);}
+.lb-rank.g{color:var(--gold);}
+.lb-rank.s{color:#c0c0c0;}
+.lb-rank.b{color:#cd7f32;}
+.lb-pts{font-family:'Space Mono',monospace;color:var(--cat);margin-left:auto;font-size:10px;}
+
+/* ══ FOOTER ══ */
+footer{border-top:1px solid var(--border);padding:24px 20px;max-width:1220px;margin:0 auto;
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.ft-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;}
+.ft-logo em{color:var(--btc);font-style:normal;}
+footer p{font-size:11px;color:var(--muted);}
+.ft-links{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap;}
+.ft-links a{font-size:11px;color:var(--muted);text-decoration:none;}
+.ft-links a:hover{color:var(--btc);}
+.built-badge{display:flex;align-items:center;gap:6px;background:rgba(247,147,26,0.07);
+  border:1px solid rgba(247,147,26,0.2);border-radius:6px;padding:4px 10px;font-size:10px;color:var(--btc);}
+
+/* ══ QUOTES TICKER ══ */
+.quotes-ticker-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:0;overflow:hidden;position:relative;}
+.quotes-ticker-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--moto),var(--cat),var(--btc),var(--green));}
+.quotes-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;padding:12px 20px 8px;border-bottom:1px solid var(--border);}
+.quotes-track-outer{overflow:hidden;padding:16px 0;position:relative;}
+.quotes-track-outer::before,.quotes-track-outer::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none;}
+.quotes-track-outer::before{left:0;background:linear-gradient(90deg,var(--card),transparent);}
+.quotes-track-outer::after{right:0;background:linear-gradient(270deg,var(--card),transparent);}
+.quotes-track{display:flex;gap:0;width:max-content;animation:quotesScroll 55s linear infinite;}
+.quotes-track:hover{animation-play-state:paused;}
+@keyframes quotesScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.quote-card{display:flex;flex-direction:column;gap:6px;padding:10px 24px;min-width:320px;max-width:380px;
+  border-right:1px solid var(--border);flex-shrink:0;}
+.quote-text{font-size:13px;line-height:1.55;color:var(--text);font-style:italic;}
+.quote-text::before{content:'"';color:var(--btc);font-size:18px;font-style:normal;margin-right:2px;}
+.quote-text::after{content:'"';color:var(--btc);font-size:18px;font-style:normal;margin-left:2px;}
+.quote-author{font-size:11px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px;}
+.quote-author em{font-style:normal;color:var(--moto);}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px 18px;font-size:13px;font-weight:600;opacity:0;
+  transform:translateY(16px);transition:.3s;pointer-events:none;max-width:300px;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.success{border-color:rgba(0,214,143,0.4);color:var(--green);}
+#toast.error{border-color:rgba(255,61,90,0.4);color:var(--red);}
+#toast.info{border-color:rgba(124,58,237,0.4);color:#a78bfa;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:24px;}
+  .charts-row{grid-template-columns:1fr;}
+  .swap-grid{grid-template-columns:1fr;}
+  .copilot-grid{grid-template-columns:1fr;}
+  .game-layout{grid-template-columns:1fr;}
+  nav{display:none;}
+  .comp-features{display:none;}
+}
+@media(max-width:600px){
+  .pill-moto{display:none;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .defi-stats{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">OP<em>_</em>NET</div>
+  <div class="pill pill-btc">₿ <span id="tpBtc">—</span> <span class="chg" id="tpBtcC">—</span></div>
+  <nav>
+    <a href="#charts">Charts</a>
+    <a href="#swap">Swap</a>
+    <a href="#copilot">Copilot</a>
+    <a href="#ecosystem">Ecosystem</a>
+    <a href="#game">Game</a>
+    <a href="https://defibible.opnet.org" target="_blank" style="color:var(--btc)">DeFiBible ↗</a>
+  </nav>
+  <button class="conn-btn" onclick="connectWallet()">⚡ Connect Wallet</button>
+</header>
+
+<div class="pg">
+<!-- HERO -->
+<div class="hero wrap" id="hero">
+  <div>
+    <h1 class="hero-h1">BITCOIN<br><em class="hero-defi">DEFI</em><br>HUB</h1>
+    <p class="hero-sub">The most complete OP_NET dashboard — live charts, one-click swaps, wallet AI, MotoCat pinball and the full Bitcoin L1 DeFi ecosystem.</p>
+    <div class="hero-btns">
+      <a href="#swap" class="btn-o btn-solid">🔄 Swap Tokens</a>
+      <a href="#charts" class="btn-o btn-ghost">📈 Live Charts</a>
+      <a href="#game" class="btn-o btn-pink">🐱 Play Games</a>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="sc">
+      <div class="sc-lbl">BTC Price</div>
+      <div class="sc-val" id="hBtc">—</div>
+      <div class="sc-sub" id="hBtcC">Loading...</div>
+    </div>
+    <div class="sc">
+      <div class="sc-lbl">Network Status</div>
+      <div class="sc-val" style="color:var(--green);font-size:14px">● LIVE</div>
+      <div class="sc-sub">OP_NET Mainnet</div>
+    </div>
+    <div class="sc">
+      <div class="sc-lbl">Total Swaps</div>
+      <div class="sc-val">325k+</div>
+      <div class="sc-sub">MotoSwap testnet</div>
+    </div>
+    <div class="sc">
+      <div class="sc-lbl">MOTO Staked</div>
+      <div class="sc-val">296M</div>
+      <div class="sc-sub up">+13.8k tBTC staked</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="wrap" style="padding-bottom:8px;" id="charts">
+  <div class="sec-title">📈 Live Market Data</div>
+</div>
+<div class="charts-row">
+  <div class="chart-card btc-card">
+    <div class="cc-head">
+      <div>
+        <div class="cc-name">Bitcoin / USD</div>
+        <div class="cc-price" id="cBtcP">—</div>
+        <span class="cc-chg" id="cBtcC">—</span>
+      </div>
+      <div class="chart-tabs" id="btcTabs">
+        <button class="ctab" onclick="loadBtcChart('1')">1D</button>
+        <button class="ctab on" onclick="loadBtcChart('7')">7D</button>
+        <button class="ctab" onclick="loadBtcChart('30')">1M</button>
+        <button class="ctab" onclick="loadBtcChart('90')">3M</button>
+        <button class="ctab" onclick="loadBtcChart('365')">1Y</button>
+      </div>
+    </div>
+    <canvas id="btcChart" height="160"></canvas>
+    <div class="cc-foot">
+      <div class="cc-stat"><span>24h High</span><b id="bHi">—</b></div>
+      <div class="cc-stat"><span>24h Low</span><b id="bLo">—</b></div>
+      <div class="cc-stat"><span>MCap</span><b id="bMC">—</b></div>
+      <div class="cc-stat"><span>Vol</span><b id="bVol">—</b></div>
+      <div style="margin-left:auto;font-size:10px;color:var(--muted);">via CoinGecko</div>
+    </div>
+  </div>
+</div>
+
+<!-- SWAP WIDGET -->
+<div class="swap-section" id="swap">
+  <div class="wrap" style="padding:0;margin-bottom:18px;">
+    <div class="sec-title">🔄 MotoSwap — OP_NET DEX</div>
+  </div>
+  <div class="swap-grid">
+    <div class="swap-card">
+      <div class="sw-title">Token Swap</div>
+      <div class="sw-sub">Swap OP_20 tokens on Bitcoin L1 via MotoSwap</div>
+      <!-- FROM -->
+      <div class="sw-box">
+        <div class="sw-row">
+          <div class="sw-label">From</div>
+          <span class="sw-max" onclick="setMax('from')">MAX</span>
+        </div>
+        <div class="sw-inner">
+          <input class="sw-input" id="swFromAmt" type="number" placeholder="0.0" oninput="calcSwap()">
+          <div class="tok-pos-rel">
+            <button class="tok-btn" id="fromTokBtn" onclick="toggleDropdown('from')">
+              <span class="tok-dot tok-rbtc">₿</span>
+              <span id="fromTokName">rBTC</span> ▾
+            </button>
+            <div class="tok-dropdown" id="fromDrop">
+              <div class="tok-opt" onclick="selectToken('from','rBTC','₿','tok-rbtc')"><span class="tok-dot tok-rbtc">₿</span>rBTC (Regtest BTC)</div>
+              <div class="tok-opt" onclick="selectToken('from','MOTO','🛵','tok-moto')"><span class="tok-dot tok-moto">M</span>MOTO (MotoSwap)</div>
+              <div class="tok-opt" onclick="selectToken('from','PILL','💊','tok-pill')"><span class="tok-dot tok-pill">P</span>PILL</div>
+              <div class="tok-opt" onclick="selectToken('from','WBTC','₿','tok-btc')"><span class="tok-dot tok-btc">W</span>WBTC</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;">
+          Balance: <span id="fromBal">—</span>
+        </div>
+      </div>
+      <!-- ARROW -->
+      <div class="sw-arrow-row"><div class="sw-arrow" onclick="flipTokens()">⇅</div></div>
+      <!-- TO -->
+      <div class="sw-box">
+        <div class="sw-row">
+          <div class="sw-label">To (estimated)</div>
+          <span class="sw-max" style="color:var(--muted);">slippage: <span id="slippageVal">0.5%</span></span>
+        </div>
+        <div class="sw-inner">
+          <input class="sw-input" id="swToAmt" type="number" placeholder="0.0" readonly style="opacity:.7;">
+          <div class="tok-pos-rel">
+            <button class="tok-btn" id="toTokBtn" onclick="toggleDropdown('to')">
+              <span class="tok-dot tok-moto">M</span>
+              <span id="toTokName">MOTO</span> ▾
+            </button>
+            <div class="tok-dropdown" id="toDrop">
+              <div class="tok-opt" onclick="selectToken('to','rBTC','₿','tok-rbtc')"><span class="tok-dot tok-rbtc">₿</span>rBTC</div>
+              <div class="tok-opt" onclick="selectToken('to','MOTO','🛵','tok-moto')"><span class="tok-dot tok-moto">M</span>MOTO</div>
+              <div class="tok-opt" onclick="selectToken('to','PILL','💊','tok-pill')"><span class="tok-dot tok-pill">P</span>PILL</div>
+              <div class="tok-opt" onclick="selectToken('to','WBTC','₿','tok-btc')"><span class="tok-dot tok-btc">W</span>WBTC</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace;">
+          Balance: <span id="toBal">—</span>
+        </div>
+      </div>
+      <div class="sw-rate" id="swRate">Enter amount to see rate</div>
+      <div class="sw-details" id="swDetails" style="display:none">
+        <div class="sw-detail-row"><span>Exchange Rate</span><b id="swRateB">—</b></div>
+        <div class="sw-detail-row"><span>Price Impact</span><b id="swImpact" style="color:var(--green)">—</b></div>
+        <div class="sw-detail-row"><span>Liquidity Fee (0.3%)</span><b id="swFee">—</b></div>
+        <div class="sw-detail-row"><span>Min Received</span><b id="swMin">—</b></div>
+        <div class="sw-detail-row"><span>Route</span><b id="swRoute" style="color:var(--moto)">—</b></div>
+      </div>
+      <button class="sw-btn" id="swapBtn" onclick="executeSwap()">Connect Wallet to Swap</button>
+      <div class="sw-notice">Powered by <a href="https://motoswap.org" target="_blank">MotoSwap</a> on OP_NET · <a href="https://opnet.org" target="_blank">Bitcoin L1</a></div>
+    </div>
+    <div class="swap-info">
+      <div class="si-title">📊 Pool Overview</div>
+      <div class="pool-list">
+        <div class="pool-item">
+          <div class="pool-pair" style="display:flex;align-items:center;gap:8px;">
+            rBTC / MOTO
+            <span class="apy-badge">38.2% APY</span>
+          </div>
+          <div class="pool-stats">
+            <div class="pool-stat"><span>TVL</span><b>$2.1M</b></div>
+            <div class="pool-stat"><span>Vol 24h</span><b>$84k</b></div>
+            <div class="pool-stat"><span>Fees</span><b>0.3%</b></div>
+          </div>
+        </div>
+        <div class="pool-item">
+          <div class="pool-pair" style="display:flex;align-items:center;gap:8px;">
+            PILL / MOTO
+            <span class="apy-badge">52.7% APY</span>
+          </div>
+          <div class="pool-stats">
+            <div class="pool-stat"><span>TVL</span><b>$890k</b></div>
+            <div class="pool-stat"><span>Vol 24h</span><b>$31k</b></div>
+            <div class="pool-stat"><span>Fees</span><b>0.3%</b></div>
+          </div>
+        </div>
+        <div class="pool-item">
+          <div class="pool-pair" style="display:flex;align-items:center;gap:8px;">
+            WBTC / rBTC
+            <span class="apy-badge">12.4% APY</span>
+          </div>
+          <div class="pool-stats">
+            <div class="pool-stat"><span>TVL</span><b>$5.4M</b></div>
+            <div class="pool-stat"><span>Vol 24h</span><b>$220k</b></div>
+            <div class="pool-stat"><span>Fees</span><b>0.05%</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="swap-tx">
+        <div class="tx-title">Recent Swaps</div>
+        <div id="recentTxs">
+          <div class="tx-item"><div class="tx-dot"></div><div class="tx-addr">bcrt1p...8f3a</div><div class="tx-amt">+420 MOTO</div><div class="tx-time">12s ago</div></div>
+          <div class="tx-item"><div class="tx-dot"></div><div class="tx-addr">bcrt1q...2c9e</div><div class="tx-amt">0.012 rBTC</div><div class="tx-time">34s ago</div></div>
+          <div class="tx-item"><div class="tx-dot" style="background:var(--moto)"></div><div class="tx-addr">bcrt1p...7d11</div><div class="tx-amt">+1,200 PILL</div><div class="tx-time">1m ago</div></div>
+          <div class="tx-item"><div class="tx-dot"></div><div class="tx-addr">bcrt1q...aa02</div><div class="tx-amt">0.005 rBTC</div><div class="tx-time">2m ago</div></div>
+          <div class="tx-item"><div class="tx-dot" style="background:var(--cat)"></div><div class="tx-addr">bcrt1p...3f88</div><div class="tx-amt">+890 MOTO</div><div class="tx-time">3m ago</div></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <a href="https://motoswap.org" target="_blank" class="btn-o btn-ghost" style="font-size:12px;padding:8px 16px;width:100%;justify-content:center;">
+          Open Full MotoSwap DEX →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WALLET COPILOT -->
+<div class="wrap" style="padding-top:32px;padding-bottom:18px;" id="copilot">
+  <div class="sec-title">🤖 AI Wallet Copilot</div>
+  <div class="copilot-grid">
+    <div class="tool-card">
+      <div class="tc-h">🔍 Address Analyzer</div>
+      <div class="tc-s">Inspect rBTC, OP_20 tokens, and transaction history</div>
+      <div class="inp-row">
+        <input class="addr-in" id="anaAddr" placeholder="bcrt1p... or type 'demo'">
+        <button class="go-btn" onclick="analyzeAddr()">Analyze →</button>
+      </div>
+      <div class="res-box" id="anaRes"><span style="color:var(--muted)">Enter any OP_NET address to analyze. Type "demo" for a sample.</span></div>
+      <div class="ai-box" id="anaAI"><div class="ai-tag">🤖 AI Copilot Insight</div><div id="anaAITxt"></div></div>
+    </div>
+    <div class="tool-card">
+      <div class="tc-h">📊 DeFi Positions</div>
+      <div class="tc-s">View liquidity pools, staking and yield estimates</div>
+      <div class="inp-row">
+        <input class="addr-in" id="defiAddr" placeholder="bcrt1p... or type 'demo'">
+        <button class="go-btn" onclick="loadDefi()">Load →</button>
+      </div>
+      <div class="res-box" id="defiRes"><span style="color:var(--muted)">Enter address to see DeFi positions on OP_NET.</span></div>
+      <div class="defi-stats">
+        <div class="ds"><div class="ds-l">Wallet</div><div class="ds-v" id="dsW">—</div></div>
+        <div class="ds"><div class="ds-l">In DeFi</div><div class="ds-v" id="dsD">—</div></div>
+        <div class="ds"><div class="ds-l">Positions</div><div class="ds-v" id="dsP">—</div></div>
+        <div class="ds"><div class="ds-l">Daily Est.</div><div class="ds-v" id="dsY" style="color:var(--green)">—</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ECOSYSTEM -->
+<div class="wrap" style="padding-top:32px;padding-bottom:18px;" id="ecosystem">
+  <div class="sec-title">🌐 OP_NET Ecosystem</div>
+  <div class="eco-grid">
+    <a href="https://motoswap.org" target="_blank" class="eco-card">
+      <div class="eco-icon">🛵</div><div class="eco-nm">MotoSwap DEX</div>
+      <div class="eco-ds">First Bitcoin L1 DEX. Swap, LP, stake $MOTO — fully self-custodial.</div>
+      <span class="eco-tg tg-moto">DEX · AMM</span>
+    </a>
+    <a href="https://garage.motoswap.org" target="_blank" class="eco-card">
+      <div class="eco-icon">🐱</div><div class="eco-nm">MotoCats Garage</div>
+      <div class="eco-ds">10,000 Bitcoin-native NFTs. Stake MotoCats, earn real yield.</div>
+      <span class="eco-tg tg-cat">NFT · OP_721</span>
+    </a>
+    <a href="https://motoswap.org/stake" target="_blank" class="eco-card">
+      <div class="eco-icon">🏦</div><div class="eco-nm">MotoChef Farm</div>
+      <div class="eco-ds">Stake LP tokens, earn $MOTO farming rewards with MotoChef.</div>
+      <span class="eco-tg tg-moto">Yield · Farm</span>
+    </a>
+    <a href="https://faucet.opnet.org" target="_blank" class="eco-card">
+      <div class="eco-icon">🚰</div><div class="eco-nm">rBTC Faucet</div>
+      <div class="eco-ds">Free regtest BTC to start exploring OP_NET DeFi protocols.</div>
+      <span class="eco-tg tg-btc">Testnet</span>
+    </a>
+    <a href="https://opnet.org" target="_blank" class="eco-card">
+      <div class="eco-icon">🌐</div><div class="eco-nm">OP_NET Portal</div>
+      <div class="eco-ds">Main hub. Earn points, complete on-chain tasks, climb the leaderboard.</div>
+      <span class="eco-tg tg-gold">Points · Airdrop</span>
+    </a>
+    <a href="https://docs.opnet.org" target="_blank" class="eco-card">
+      <div class="eco-icon">📖</div><div class="eco-nm">Developer Docs</div>
+      <div class="eco-ds">Build OP_20 tokens &amp; OP_721 NFTs with AssemblyScript on Bitcoin.</div>
+      <span class="eco-tg tg-btc">Dev · SDK</span>
+    </a>
+    <a href="https://chromewebstore.google.com/detail/opwallet/pmbjpcmaaladnfpacpmhmnfmpklgbdjb" target="_blank" class="eco-card">
+      <div class="eco-icon">🔐</div><div class="eco-nm">OP_WALLET</div>
+      <div class="eco-ds">Official Chrome wallet for OP_NET. Self-custodial, Bitcoin-native.</div>
+      <span class="eco-tg tg-btc">Wallet</span>
+    </a>
+    <a href="https://opnet.org/points" target="_blank" class="eco-card">
+      <div class="eco-icon">🏆</div><div class="eco-nm">Airdrop Points</div>
+      <div class="eco-ds">Complete tasks every 48h to earn points toward the mainnet airdrop.</div>
+      <span class="eco-tg tg-gold">Airdrop</span>
+    </a>
+    <a href="https://defibible.opnet.org" target="_blank" class="eco-card">
+      <div class="eco-icon">📜</div><div class="eco-nm">DeFiBible</div>
+      <div class="eco-ds">The complete knowledge base for Bitcoin DeFi on OP_NET. Learn, build and understand the ecosystem.</div>
+      <span class="eco-tg tg-btc">Knowledge</span>
+    </a>
+  </div>
+</div>
+
+<!-- PINBALL GAME -->
+<div class="wrap" style="padding-top:32px;padding-bottom:32px;" id="game">
+  <div class="sec-title">🎮 MotoCat Pinball — OP_NET Edition</div>
+  <div class="game-card">
+    <div class="gm-title">🐱 MOTOCAT PINBALL</div>
+    <div class="gm-sub">Launch the MotoCat ball! Hit bumpers to collect $MOTO, PILL & rBTC. Use flippers to survive the blockchain!</div>
+    <div class="game-layout">
+      <canvas id="pb" height="520"></canvas>
+      <div class="game-panel">
+        <div class="gp-score">
+          <div class="gp-score-lbl">Score</div>
+          <div class="gp-score-val" id="pbScore">0</div>
+          <div class="gp-best">Best: <span id="pbBest">0</span></div>
+          <div class="gp-lives">
+            <span class="life-cat alive" id="life0">🐱</span>
+            <span class="life-cat alive" id="life1">🐱</span>
+            <span class="life-cat alive" id="life2">🐱</span>
+          </div>
+        </div>
+        <div>
+          <div class="multiplier-bar"><div class="multiplier-fill" id="multFill" style="width:0%"></div></div>
+          <div class="mult-lbl"><span>Multiplier</span><span id="multVal">x1</span></div>
+        </div>
+        <button class="gm-btn gm-start" id="pbStartBtn" onclick="pbStart()">▶ Launch Cat!</button>
+        <button class="gm-btn gm-reset" onclick="pbReset()">↩ Reset</button>
+        <div class="gm-instruct">
+          <h4>🎮 Controls</h4>
+          <p><b>Z / ←</b> = Left flipper<br><b>/ / →</b> = Right flipper<br><b>Space</b> = Launch ball<br><b>Tap sides</b> on mobile</p>
+          <br>
+          <h4>🪙 Targets</h4>
+          <p><span style="color:var(--btc)">₿</span> rBTC = 500 pts<br>
+          <span style="color:#a78bfa">M</span> MOTO = 200 pts<br>
+          <span style="color:var(--green)">P</span> PILL = 100 pts<br>
+          <span style="color:var(--cat)">🐱</span> Cat = 1000 pts!</p>
+        </div>
+        <div>
+          <div class="lb-title">🏆 High Scores</div>
+          <div id="pbLb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOTOCAT RIDER (global overlay) -->
+<canvas id="motoRider" width="140" height="70"></canvas>
+
+<!-- BTC BLOCK MINER GAME -->
+<div class="wrap" style="padding-top:16px;padding-bottom:32px;">
+  <div class="sec-title">⛏️ BTC Block Miner</div>
+  <div class="miner-card">
+    <div class="miner-title">⛏️ BTC BLOCK MINER</div>
+    <div class="miner-sub">Click/tap to smash blocks and mine $MOTO. Upgrade your rig to mine faster. Race the clock!</div>
+    <div class="miner-layout">
+      <canvas id="minerCanvas" height="400"></canvas>
+      <div class="miner-panel">
+        <div class="mp-stat">
+          <div class="mp-stat-lbl">$MOTO Mined</div>
+          <div class="mp-stat-val" id="mMined">0</div>
+        </div>
+        <div class="mp-stat" style="background:rgba(0,214,143,0.07);border-color:rgba(0,214,143,0.2);">
+          <div class="mp-stat-lbl" style="color:var(--green)">Hash Rate</div>
+          <div class="mp-stat-val" id="mHash" style="font-size:22px;color:var(--green)">1 H/s</div>
+          <div class="hashbar"><div class="hashfill" id="hashFill" style="width:0%"></div></div>
+        </div>
+        <div class="mp-stat" style="background:rgba(124,58,237,0.07);border-color:rgba(124,58,237,0.2);">
+          <div class="mp-stat-lbl" style="color:#a78bfa">Blocks Found</div>
+          <div class="mp-stat-val" id="mBlocks" style="color:#a78bfa">0</div>
+        </div>
+        <div class="mp-upgrade">
+          <h4>⚡ Upgrades</h4>
+          <button class="upgrade-btn" id="upg0" onclick="buyUpgrade(0)">
+            <span>🖥️ GPU Rig</span><span class="ub-cost" id="upg0cost">50 MOTO</span>
+          </button>
+          <button class="upgrade-btn" id="upg1" onclick="buyUpgrade(1)">
+            <span>⚡ ASIC Miner</span><span class="ub-cost" id="upg1cost">200 MOTO</span>
+          </button>
+          <button class="upgrade-btn" id="upg2" onclick="buyUpgrade(2)">
+            <span>🏭 Mining Farm</span><span class="ub-cost" id="upg2cost">1000 MOTO</span>
+          </button>
+          <button class="upgrade-btn" id="upg3" onclick="buyUpgrade(3)">
+            <span>🛰️ Satellite Rig</span><span class="ub-cost" id="upg3cost">5000 MOTO</span>
+          </button>
+        </div>
+        <button class="gm-btn gm-reset" style="width:100%" onclick="resetMiner()">↩ Reset Miner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTES TICKER -->
+<div class="wrap" style="padding-bottom:32px;">
+  <div class="quotes-ticker-wrap">
+    <div class="quotes-label">💬 FROM THE COMMUNITY</div>
+    <div class="quotes-track-outer">
+      <div class="quotes-track" id="quoteTrack"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .pg -->
+
+<footer class="wrap">
+  <div class="ft-logo">OP<em>_</em>NET</div>
+  <p>Bitcoin Layer 1 DeFi · MotoSwap · MotoCats · OP_20 Smart Contracts</p>
+  <div class="ft-links">
+    <a href="https://opnet.org" target="_blank">Portal</a>
+    <a href="https://motoswap.org" target="_blank">MotoSwap</a>
+    <a href="https://garage.motoswap.org" target="_blank">MotoCats</a>
+    <a href="https://docs.opnet.org" target="_blank">Docs</a>
+    <a href="https://faucet.opnet.org" target="_blank">Faucet</a>
+  </div>
+  <div class="built-badge">⚡ Built on OP_NET</div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function toast(msg, type='info', dur=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = '', dur);
+}
+
+// ══════════════════════════════════════
+// PRICE DATA
+// ══════════════════════════════════════
+let btcData = {};
+let btcChart = null;
+
+async function fetchPrices() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true&include_high_24h=true&include_low_24h=true');
+    const d = await r.json();
+    btcData = d.bitcoin || {};
+    updatePriceUI();
+  } catch(e) { console.warn('Price fetch failed', e); }
+}
+
+function fmt(n, d=0) { return n ? n.toLocaleString('en-US',{maximumFractionDigits:d}) : '—'; }
+function fmtUsd(n) { return n ? '$'+fmt(n) : '—'; }
+
+function updatePriceUI() {
+  const bp = btcData.usd, bc = btcData.usd_24h_change;
+  const bup = bc >= 0;
+
+  if(bp) {
+    document.getElementById('tpBtc').textContent = '$'+fmt(bp);
+    const c1 = document.getElementById('tpBtcC');
+    c1.textContent = (bup?'+':'')+bc?.toFixed(2)+'%';
+    c1.className = 'chg ' + (bup?'up':'dn');
+
+    document.getElementById('hBtc').textContent = '$'+Math.round(bp/1000)+'k';
+    const s1 = document.getElementById('hBtcC');
+    s1.textContent = (bup?'▲':'▼')+' '+(bup?'+':'')+bc?.toFixed(2)+'% 24h';
+    s1.className = 'sc-sub '+(bup?'up':'dn');
+
+    document.getElementById('cBtcP').textContent = '$'+fmt(bp);
+    const bc2 = document.getElementById('cBtcC');
+    bc2.textContent = (bup?'▲':'▼')+' '+(bup?'+':'')+bc?.toFixed(2)+'%';
+    bc2.className = 'cc-chg '+(bup?'up':'dn');
+    document.getElementById('bHi').textContent = fmtUsd(btcData.usd_high_24h);
+    document.getElementById('bLo').textContent = fmtUsd(btcData.usd_low_24h);
+    document.getElementById('bMC').textContent = btcData.usd_market_cap ? '$'+(btcData.usd_market_cap/1e12).toFixed(2)+'T' : '—';
+    document.getElementById('bVol').textContent = btcData.usd_24h_vol ? '$'+(btcData.usd_24h_vol/1e9).toFixed(1)+'B' : '—';
+  }
+}
+
+function makeChart(canvasId, prices, labels, colorHex, isMoto=false) {
+  const prev = isMoto ? motoChart : btcChart;
+  if(prev) prev.destroy();
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const isUp = prices[prices.length-1] >= prices[0];
+  const col = isUp ? colorHex : '#ff3d5a';
+  const grad = ctx.createLinearGradient(0,0,0,isMoto?200:200);
+  grad.addColorStop(0, col.replace('#','rgba(').replace(/(.{2})(.{2})(.{2})/,'$1,$2,$3') +',0.25)');
+  // simpler way:
+  const gradFill = col + '33';
+  const chart = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{data:prices,borderColor:col,backgroundColor:gradFill,borderWidth:1.5,pointRadius:0,tension:.35,fill:true}] },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      interaction:{intersect:false,mode:'index'},
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'rgba(8,8,16,0.95)',borderColor:'rgba(247,147,26,0.3)',borderWidth:1,
+        titleColor:'#666',bodyColor:'#fff',
+        callbacks:{label:c=>'$'+(isMoto?c.parsed.y.toFixed(6):c.parsed.y.toLocaleString('en-US',{maximumFractionDigits:0}))}
+      }},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#444',maxTicksLimit:6,font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,0.03)'},position:'right',
+          ticks:{color:'#444',font:{size:10,family:'Space Mono'},
+          callback:v=>isMoto?'$'+v.toFixed(5):'$'+(v/1000).toFixed(0)+'k'}}
+      }
+    }
+  });
+  if(isMoto) motoChart = chart; else btcChart = chart;
+}
+
+async function loadBtcChart(days) {
+  document.querySelectorAll('#btcTabs .ctab').forEach((t,i)=>t.classList.toggle('on',['1','7','30','90','365'][i]===days));
+  try {
+    const r = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
+    const d = await r.json();
+    const labels = d.prices.map(p=>{const dt=new Date(p[0]);return days==='1'?dt.getHours()+':'+String(dt.getMinutes()).padStart(2,'0'):(dt.getMonth()+1)+'/'+(dt.getDate());});
+    makeChart('btcChart', d.prices.map(p=>p[1]), labels, '#f7931a');
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════
+// WALLET
+// ══════════════════════════════════════
+let walletConnected = false;
+
+function connectWallet() {
+  if(!walletConnected) {
+    walletConnected = true;
+    document.querySelector('.conn-btn').textContent = '✓ Connected';
+    document.querySelector('.conn-btn').style.background = 'rgba(0,214,143,0.2)';
+    document.querySelector('.conn-btn').style.color = '#00d68f';
+    document.querySelector('.conn-btn').style.border = '1px solid rgba(0,214,143,0.4)';
+    document.getElementById('fromBal').textContent = '0.042 rBTC';
+    document.getElementById('toBal').textContent = '12,400 MOTO';
+    document.getElementById('swapBtn').textContent = 'Swap Tokens';
+    document.getElementById('swapBtn').disabled = false;
+    toast('✓ Wallet connected! (demo mode)', 'success');
+  } else {
+    walletConnected = false;
+    document.querySelector('.conn-btn').textContent = '⚡ Connect Wallet';
+    document.querySelector('.conn-btn').style.cssText = '';
+    document.getElementById('fromBal').textContent = '—';
+    document.getElementById('toBal').textContent = '—';
+    document.getElementById('swapBtn').textContent = 'Connect Wallet to Swap';
+    toast('Wallet disconnected', 'error');
+  }
+}
+
+// ══════════════════════════════════════
+// SWAP WIDGET
+// ══════════════════════════════════════
+let fromTok = 'rBTC', toTok = 'MOTO';
+const RATES = { 'rBTC-MOTO':14200, 'rBTC-PILL':38000, 'rBTC-WBTC':0.99, 'MOTO-rBTC':1/14200, 'MOTO-PILL':2.67, 'PILL-MOTO':0.375, 'PILL-rBTC':1/38000, 'WBTC-rBTC':1.01, 'MOTO-WBTC':1/14000, 'WBTC-MOTO':14100 };
+
+function getRate(from, to) {
+  if(from===to) return 1;
+  return RATES[from+'-'+to] || (RATES[to+'-'+from] ? 1/RATES[to+'-'+from] : 1);
+}
+
+function calcSwap() {
+  const amt = parseFloat(document.getElementById('swFromAmt').value)||0;
+  if(!amt) { document.getElementById('swToAmt').value=''; document.getElementById('swRate').textContent='Enter amount to see rate'; document.getElementById('swDetails').style.display='none'; return; }
+  const rate = getRate(fromTok, toTok);
+  const out = amt * rate * 0.997;
+  document.getElementById('swToAmt').value = out < 0.001 ? out.toFixed(6) : out.toFixed(4);
+  const impact = amt > 1 ? 0.82 : 0.12;
+  document.getElementById('swRate').innerHTML = `<b>1 ${fromTok} ≈ ${rate<0.001?rate.toFixed(6):rate.toFixed(4)} ${toTok}</b>`;
+  document.getElementById('swDetails').style.display='block';
+  document.getElementById('swRateB').textContent = `1 ${fromTok} = ${rate<0.001?rate.toFixed(6):rate.toFixed(4)} ${toTok}`;
+  document.getElementById('swImpact').textContent = impact+'%';
+  document.getElementById('swImpact').style.color = impact > 1 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('swFee').textContent = (amt*0.003).toFixed(6)+' '+fromTok;
+  document.getElementById('swMin').textContent = (out*0.995).toFixed(4)+' '+toTok;
+  document.getElementById('swRoute').textContent = fromTok + ' → MotoSwap → ' + toTok;
+}
+
+function toggleDropdown(side) {
+  const d = document.getElementById(side==='from'?'fromDrop':'toDrop');
+  const other = document.getElementById(side==='from'?'toDrop':'fromDrop');
+  other.classList.remove('open');
+  d.classList.toggle('open');
+}
+
+function selectToken(side, tok, icon, dotClass) {
+  const btn = document.getElementById(side==='from'?'fromTokBtn':'toTokBtn');
+  const nameEl = document.getElementById(side==='from'?'fromTokName':'toTokName');
+  const dot = btn.querySelector('.tok-dot');
+  dot.className = 'tok-dot ' + dotClass;
+  dot.textContent = icon;
+  nameEl.textContent = tok;
+  document.getElementById(side==='from'?'fromDrop':'toDrop').classList.remove('open');
+  if(side==='from') fromTok=tok; else toTok=tok;
+  calcSwap();
+}
+
+function setMax(side) {
+  if(!walletConnected) { toast('Connect wallet first!', 'error'); return; }
+  document.getElementById('swFromAmt').value = '0.042';
+  calcSwap();
+}
+
+function flipTokens() {
+  const fN=document.getElementById('fromTokName').textContent;
+  const tN=document.getElementById('toTokName').textContent;
+  const fD=document.getElementById('fromTokBtn').querySelector('.tok-dot');
+  const tD=document.getElementById('toTokBtn').querySelector('.tok-dot');
+  const tmpC=fD.className, tmpT=fD.textContent;
+  fD.className=tD.className; fD.textContent=tD.textContent;
+  tD.className=tmpC; tD.textContent=tmpT;
+  document.getElementById('fromTokName').textContent=tN;
+  document.getElementById('toTokName').textContent=fN;
+  fromTok=tN; toTok=fN;
+  const tmpAmt=document.getElementById('swFromAmt').value;
+  document.getElementById('swFromAmt').value=document.getElementById('swToAmt').value;
+  calcSwap();
+}
+
+function executeSwap() {
+  if(!walletConnected) { connectWallet(); return; }
+  const amt = document.getElementById('swFromAmt').value;
+  if(!amt||parseFloat(amt)<=0) { toast('Enter an amount first', 'error'); return; }
+  const btn = document.getElementById('swapBtn');
+  btn.textContent='Swapping...'; btn.classList.add('loading'); btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='Swap Tokens'; btn.classList.remove('loading'); btn.disabled=false;
+    toast(`✓ Swapped ${amt} ${fromTok} → ${document.getElementById('swToAmt').value} ${toTok}`, 'success', 4000);
+    addFakeTx(fromTok, toTok, amt);
+  }, 1800);
+}
+
+function addFakeTx(from, to, amt) {
+  const txs = document.getElementById('recentTxs');
+  const div = document.createElement('div');
+  div.className='tx-item';
+  div.innerHTML=`<div class="tx-dot" style="background:var(--cat)"></div><div class="tx-addr">bcrt1p...you</div><div class="tx-amt">${amt} ${from}→${to}</div><div class="tx-time">just now</div>`;
+  txs.insertBefore(div, txs.firstChild);
+  if(txs.children.length>6) txs.removeChild(txs.lastChild);
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if(!e.target.closest('.tok-pos-rel')) {
+    document.querySelectorAll('.tok-dropdown').forEach(d=>d.classList.remove('open'));
+  }
+});
+
+// ══════════════════════════════════════
+// WALLET COPILOT
+// ══════════════════════════════════════
+function analyzeAddr() {
+  const addr = document.getElementById('anaAddr').value.trim();
+  const res = document.getElementById('anaRes');
+  const ai = document.getElementById('anaAI');
+  if(!addr) { res.innerHTML='<span style="color:var(--red)">Please enter an address.</span>'; return; }
+  res.innerHTML='<span style="color:var(--btc)">⟳ Querying OP_NET...</span>';
+  ai.style.display='none';
+  setTimeout(()=>{
+    res.innerHTML=`Address: <span style="color:var(--btc)">${addr.slice(0,14)}...${addr.slice(-6)||addr}</span>\n\nrBTC Balance:  <span style="color:#fff">0.00842 rBTC</span>\n\nOP_20 Tokens:\n  MOTO  <span style="color:#a78bfa">12,400.00</span>\n  PILL  <span style="color:var(--green)">3,200.50</span>\n  CATS  <span style="color:var(--cat)">1 NFT</span>\n\nTransactions (last 7):\n  ✓ Swap rBTC→MOTO    <span style="color:var(--green)">confirmed</span>\n  ✓ Add LP rBTC/MOTO  <span style="color:var(--green)">confirmed</span>\n  ✓ Stake MOTO        <span style="color:var(--green)">confirmed</span>\n  ✓ Claim PILL reward <span style="color:var(--green)">confirmed</span>`;
+    ai.style.display='block';
+    document.getElementById('anaAITxt').innerHTML=`This wallet is <b>deeply embedded in the MotoSwap ecosystem</b> 🛵 — holding MOTO, PILL and a MotoCat NFT. The LP position in rBTC/MOTO is earning an estimated <b>38.2% APY</b>. Recommend checking <a href="https://motoswap.org/pools" style="color:var(--moto)">MotoSwap pools</a> to compound rewards. MOTO stake is also active — great for long-term yield accumulation.`;
+  }, 1100);
+}
+
+function loadDefi() {
+  const addr = document.getElementById('defiAddr').value.trim();
+  const res = document.getElementById('defiRes');
+  if(!addr) { res.innerHTML='<span style="color:var(--red)">Please enter an address.</span>'; return; }
+  res.innerHTML='<span style="color:var(--moto)">⟳ Loading DeFi positions...</span>';
+  setTimeout(()=>{
+    res.innerHTML=`MotoSwap LP  rBTC/MOTO\n  Deposited: <span style="color:var(--green)">$840 USD</span>  APY: <span style="color:var(--btc)">38.2%</span>\n\nMotoChef Farm  PILL-MOTO LP\n  Staked: <span style="color:var(--green)">$380 USD</span>  Daily: <span style="color:var(--green)">+0.82 MOTO</span>\n\nMotoCat Staking\n  1 NFT staked  Earning: <span style="color:var(--cat)">real yield</span>`;
+    document.getElementById('dsW').textContent='$480';
+    document.getElementById('dsD').textContent='$1,220';
+    document.getElementById('dsP').textContent='3';
+    document.getElementById('dsY').textContent='+$4.2/d';
+  }, 1000);
+}
+
+// ══════════════════════════════════════
+// MOTOCAT PINBALL — PONG BUMPERS
+// ══════════════════════════════════════
+const pb = document.getElementById('pb');
+const gc = pb.getContext('2d');
+let PBW, PBH;
+let pbState = 'idle';
+let pbScore = 0, pbBest = parseInt(localStorage.getItem('pbBest')||'0');
+let pbRaf = null;
+let lives = 3, mult = 1, multTimer = 0;
+let leftFlip = false, rightFlip = false;
+let ballLaunched = false;
+let pbLB = JSON.parse(localStorage.getItem('pbLB')||'[]');
+
+function resizePB() {
+  PBW = pb.offsetWidth || 380;
+  PBH = 520;
+  pb.width = PBW;
+  pb.height = PBH;
+}
+
+let ball = {};
+let flippers = {};
+// PONG-STYLE PADDLE BUMPERS: {x,y,w,h, vdir, speed, col, lbl, pts, flash, type}
+let paddles = [];
+let targets = [];
+
+function pbInit() {
+  resizePB();
+  const cx = PBW/2;
+  ball = { x:cx, y:PBH-130, vx:2.5, vy:-9, r:9 };
+  flippers = {
+    lx: cx-14, ly: PBH-60, lw:60,
+    rx: cx+14, ry: PBH-60, rw:60
+  };
+  // Pong-style moving paddle bumpers — horizontal and vertical sliders
+  paddles = [
+    // Top horizontal paddle (rBTC) — slides left/right
+    {x:cx-36,y:90, w:72,h:14, vx:1.8,vy:0, col:'#f7931a',lbl:'₿ rBTC',pts:500,flash:0,axis:'h',minX:30,maxX:PBW-102},
+    // Mid-left paddle (MOTO) — slides up/down
+    {x:28,y:200, w:14,h:60, vx:0,vy:1.5, col:'#7c3aed',lbl:'M',pts:200,flash:0,axis:'v',minY:160,maxY:300},
+    // Mid-right paddle (PILL) — slides up/down opposite direction
+    {x:PBW-42,y:240, w:14,h:60, vx:0,vy:-1.5, col:'#10b981',lbl:'P',pts:100,flash:0,axis:'v',minY:160,maxY:300},
+    // Lower horizontal paddle (MotoCat) — slides left/right fast
+    {x:cx-44,y:310, w:88,h:14, vx:-2.2,vy:0, col:'#ec4899',lbl:'🐱 CAT',pts:1000,flash:0,axis:'h',minX:30,maxX:PBW-118},
+    // OP_20 small vertical paddle (left-center)
+    {x:cx-80,y:190, w:12,h:44, vx:0,vy:1.2, col:'#3b82f6',lbl:'OP',pts:150,flash:0,axis:'v',minY:150,maxY:280},
+    // OP_20 small vertical paddle (right-center)
+    {x:cx+68,y:220, w:12,h:44, vx:0,vy:-1.2, col:'#3b82f6',lbl:'20',pts:150,flash:0,axis:'v',minY:150,maxY:280},
+  ];
+  targets = [
+    {x:30,y:PBH*0.35,w:16,h:55,hit:false,pts:80,col:'#fbbf24'},
+    {x:PBW-46,y:PBH*0.35,w:16,h:55,hit:false,pts:80,col:'#fbbf24'},
+    {x:30,y:PBH*0.55,w:16,h:55,hit:false,pts:80,col:'#f472b6'},
+    {x:PBW-46,y:PBH*0.55,w:16,h:55,hit:false,pts:80,col:'#f472b6'},
+  ];
+  pbScore=0; mult=1; multTimer=0; lives=3; ballLaunched=false;
+  updatePBUI();
+}
+
+function updatePBUI() {
+  document.getElementById('pbScore').textContent = pbScore.toLocaleString();
+  document.getElementById('pbBest').textContent = pbBest.toLocaleString();
+  for(let i=0;i<3;i++){const el=document.getElementById('life'+i);if(el)el.className='life-cat '+(i<lives?'alive':'');}
+  const mPct=Math.min((mult-1)/4,1)*100;
+  document.getElementById('multFill').style.width=mPct+'%';
+  document.getElementById('multVal').textContent='x'+mult.toFixed(1);
+}
+
+function pbStart() {
+  if(pbState==='playing') return;
+  pbInit(); pbState='playing';
+  document.getElementById('pbStartBtn').textContent='🚀 Playing...';
+  ballLaunched=true; ball.vy=-9; ball.vx=(Math.random()-0.5)*4;
+  pbLoop();
+}
+
+function pbReset() {
+  cancelAnimationFrame(pbRaf); pbState='idle'; pbInit();
+  document.getElementById('pbStartBtn').textContent='▶ Launch Cat!';
+  pbDraw();
+}
+
+function pbLoop() { pbRaf=requestAnimationFrame(pbLoop); pbUpdate(); pbDraw(); }
+
+function pbUpdate() {
+  if(!ballLaunched) return;
+  ball.vy+=0.28; ball.vy=Math.min(ball.vy,13);
+  ball.x+=ball.vx; ball.y+=ball.vy;
+
+  // Walls
+  if(ball.x-ball.r<20){ball.x=20+ball.r;ball.vx=Math.abs(ball.vx)*0.92;}
+  if(ball.x+ball.r>PBW-20){ball.x=PBW-20-ball.r;ball.vx=-Math.abs(ball.vx)*0.92;}
+  if(ball.y-ball.r<10){ball.y=10+ball.r;ball.vy=Math.abs(ball.vy)*0.85;}
+
+  // Move paddles
+  paddles.forEach(p=>{
+    if(p.axis==='h'){
+      p.x+=p.vx;
+      if(p.x<p.minX||p.x>p.maxX){p.vx*=-1;p.x=Math.max(p.minX,Math.min(p.maxX,p.x));}
+    } else {
+      p.y+=p.vy;
+      if(p.y<p.minY||p.y>p.maxY){p.vy*=-1;p.y=Math.max(p.minY,Math.min(p.maxY,p.y));}
+    }
+    if(p.flash>0)p.flash--;
+
+    // Ball vs paddle collision (AABB + push out + reflect)
+    const bx=ball.x,by=ball.y,br=ball.r;
+    const closestX=Math.max(p.x,Math.min(bx,p.x+p.w));
+    const closestY=Math.max(p.y,Math.min(by,p.y+p.h));
+    const dx=bx-closestX,dy=by-closestY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<br){
+      // push out
+      if(dist>0){ball.x+=dx/dist*(br-dist+1);ball.y+=dy/dist*(br-dist+1);}
+      // reflect based on which face hit
+      const overlapL=bx-(p.x+p.w), overlapR=p.x-bx;
+      const overlapT=by-(p.y+p.h), overlapB=p.y-by;
+      const minH=Math.min(Math.abs(overlapL),Math.abs(overlapR));
+      const minV=Math.min(Math.abs(overlapT),Math.abs(overlapB));
+      if(minV<minH){
+        ball.vy=-ball.vy*1.05;
+        if(p.axis==='h')ball.vx+=p.vx*0.4; // inherit paddle momentum
+      } else {
+        ball.vx=-ball.vx*1.05;
+        if(p.axis==='v')ball.vy+=p.vy*0.4;
+      }
+      ball.vx=Math.max(-14,Math.min(14,ball.vx));
+      ball.vy=Math.max(-14,Math.min(14,ball.vy));
+      const pts=Math.round(p.pts*mult);
+      pbScore+=pts; p.flash=12;
+      multTimer=140; mult=Math.min(mult+0.12,5);
+      updatePBUI();
+    }
+  });
+
+  // Side targets
+  targets.forEach(t=>{
+    if(ball.x>t.x&&ball.x<t.x+t.w&&ball.y>t.y&&ball.y<t.y+t.h){
+      ball.vx=-ball.vx*1.1; pbScore+=Math.round(t.pts*mult);
+      t.hit=true; setTimeout(()=>t.hit=false,300); updatePBUI();
+    }
+  });
+
+  // Flippers
+  const lAng=leftFlip?Math.PI+0.4:Math.PI-0.32;
+  const rAng=rightFlip?-0.4:0.32;
+  checkFlipper(flippers.lx,flippers.ly,flippers.lw,lAng);
+  checkFlipper(flippers.rx,flippers.ry,flippers.rw,rAng);
+
+  // Multiplier decay
+  if(multTimer>0){multTimer--;}else{mult=Math.max(1,mult-0.004);updatePBUI();}
+
+  // Lost ball
+  if(ball.y>PBH+20){
+    lives--;updatePBUI();
+    if(lives<=0){pbEndGame();return;}
+    ball.x=PBW/2;ball.y=PBH-130;ball.vx=(Math.random()-0.5)*3;ball.vy=-9;
+  }
+}
+
+function checkFlipper(px,py,len,angle) {
+  const fx=px+Math.cos(angle)*len,fy=py+Math.sin(angle)*len;
+  const ex=fx-px,ey=fy-py,lenSq=ex*ex+ey*ey;
+  const t=Math.max(0,Math.min(1,(( ball.x-px)*ex+(ball.y-py)*ey)/lenSq));
+  const cx=px+t*ex,cy=py+t*ey;
+  const dist=Math.sqrt((ball.x-cx)**2+(ball.y-cy)**2)||1;
+  if(dist<ball.r+5){
+    const nx=(ball.x-cx)/dist,ny=(ball.y-cy)/dist;
+    const spd=Math.sqrt(ball.vx**2+ball.vy**2);
+    ball.vx=nx*Math.max(spd*1.1,8);ball.vy=ny*Math.max(spd*1.1,8)-2;
+    ball.x=cx+nx*(ball.r+6);ball.y=cy+ny*(ball.r+6);
+  }
+}
+
+function pbDraw() {
+  gc.clearRect(0,0,PBW,PBH);
+  gc.fillStyle='#04040e';gc.fillRect(0,0,PBW,PBH);
+  // Grid
+  gc.strokeStyle='rgba(247,147,26,0.03)';
+  for(let x=0;x<PBW;x+=30){gc.beginPath();gc.moveTo(x,0);gc.lineTo(x,PBH);gc.stroke();}
+  for(let y=0;y<PBH;y+=30){gc.beginPath();gc.moveTo(0,y);gc.lineTo(PBW,y);gc.stroke();}
+  // Walls
+  gc.strokeStyle='rgba(247,147,26,0.4)';gc.lineWidth=2;
+  gc.beginPath();gc.moveTo(20,0);gc.lineTo(20,PBH);gc.stroke();
+  gc.beginPath();gc.moveTo(PBW-20,0);gc.lineTo(PBW-20,PBH);gc.stroke();
+  gc.lineWidth=1;
+
+  // Side targets
+  targets.forEach(t=>{
+    gc.fillStyle=t.hit?'#fff':t.col;
+    gc.shadowColor=t.col;gc.shadowBlur=t.hit?14:4;
+    gc.fillRect(t.x,t.y,t.w,t.h);gc.shadowBlur=0;
+  });
+
+  // PONG PADDLE BUMPERS
+  paddles.forEach(p=>{
+    const flash=p.flash>0;
+    gc.save();
+    gc.shadowColor=p.col;gc.shadowBlur=flash?28:10;
+    // Rounded rect paddle
+    const r=Math.min(p.w,p.h)/2;
+    gc.fillStyle=flash?'#fff':p.col;
+    gc.beginPath();gc.roundRect(p.x,p.y,p.w,p.h,r);gc.fill();
+    // Inner shine
+    gc.fillStyle='rgba(255,255,255,0.18)';
+    gc.beginPath();gc.roundRect(p.x+2,p.y+2,p.w-4,(p.h-4)*0.5,r*0.5);gc.fill();
+    // Label
+    gc.fillStyle=flash?p.col:'rgba(0,0,0,0.85)';
+    gc.font=`bold ${p.w>40?'10':'8'}px Syne,sans-serif`;
+    gc.textAlign='center';gc.textBaseline='middle';
+    gc.fillText(p.lbl,p.x+p.w/2,p.y+p.h/2);
+    // Score popup
+    if(flash){
+      gc.fillStyle='rgba(255,255,255,0.95)';gc.font='bold 11px Space Mono,monospace';
+      gc.fillText('+'+p.pts,p.x+p.w/2,p.y-12);
+    }
+    // Direction arrows on paddles
+    gc.fillStyle='rgba(255,255,255,0.25)';gc.font='9px sans-serif';
+    if(p.axis==='h')gc.fillText(p.vx>0?'→':'←',p.x+p.w/2,p.y+p.h+11);
+    else gc.fillText(p.vy>0?'↓':'↑',p.x+p.w+11,p.y+p.h/2);
+    gc.shadowBlur=0;gc.restore();
+  });
+
+  // Flippers
+  const lAng=leftFlip?Math.PI+0.4:Math.PI-0.32;
+  const rAng=rightFlip?-0.4:0.32;
+  drawFlipper(flippers.lx,flippers.ly,flippers.lw,lAng);
+  drawFlipper(flippers.rx,flippers.ry,flippers.rw,rAng);
+
+  // Drain line
+  gc.strokeStyle='rgba(255,61,90,0.25)';gc.lineWidth=1;
+  gc.beginPath();gc.moveTo(20,PBH-18);gc.lineTo(PBW-20,PBH-18);gc.stroke();
+
+  // Ball
+  if(ballLaunched||pbState!=='idle'){
+    gc.save();
+    gc.shadowColor='#f472b6';gc.shadowBlur=14;
+    const bg=gc.createRadialGradient(ball.x-3,ball.y-3,1,ball.x,ball.y,ball.r);
+    bg.addColorStop(0,'#fce7f3');bg.addColorStop(0.5,'#ec4899');bg.addColorStop(1,'#9d174d');
+    gc.fillStyle=bg;gc.beginPath();gc.arc(ball.x,ball.y,ball.r,0,Math.PI*2);gc.fill();
+    gc.font='11px sans-serif';gc.textAlign='center';gc.textBaseline='middle';gc.shadowBlur=0;
+    gc.fillText('🐱',ball.x,ball.y);gc.restore();
+  }
+
+  // Overlay states
+  if(pbState==='idle'){
+    gc.fillStyle='rgba(0,0,0,0.62)';gc.fillRect(0,0,PBW,PBH);
+    gc.save();gc.font='bold 26px Bebas Neue,sans-serif';gc.textAlign='center';
+    gc.fillStyle='#fff';gc.shadowColor='#f472b6';gc.shadowBlur=18;
+    gc.fillText('🐱 MOTOCAT PINBALL',PBW/2,PBH/2-22);
+    gc.font='13px Syne,sans-serif';gc.fillStyle='rgba(247,147,26,0.85)';gc.shadowBlur=0;
+    gc.fillText('Moving paddles · Pong-style bumpers!',PBW/2,PBH/2+6);
+    gc.font='11px Syne,sans-serif';gc.fillStyle='var(--muted)';
+    gc.fillText('Press Launch Cat! to start',PBW/2,PBH/2+26);gc.restore();
+  }
+  if(pbState==='dead'){
+    gc.fillStyle='rgba(0,0,0,0.7)';gc.fillRect(0,0,PBW,PBH);
+    gc.save();gc.font='bold 32px Bebas Neue,sans-serif';gc.textAlign='center';
+    gc.fillStyle='#ff3d5a';gc.shadowColor='#ff3d5a';gc.shadowBlur=20;
+    gc.fillText('REKT! 💀',PBW/2,PBH/2-28);
+    gc.font='18px Space Mono,monospace';gc.fillStyle='#fff';gc.shadowBlur=0;
+    gc.fillText('Score: '+pbScore.toLocaleString(),PBW/2,PBH/2+6);
+    gc.font='13px Syne,sans-serif';gc.fillStyle='rgba(247,147,26,0.8)';
+    gc.fillText('Press Launch Cat to play again',PBW/2,PBH/2+30);gc.restore();
+  }
+}
+
+function drawFlipper(px,py,len,angle){
+  const ex=px+Math.cos(angle)*len,ey=py+Math.sin(angle)*len;
+  gc.save();gc.shadowColor='#7c3aed';gc.shadowBlur=8;
+  gc.strokeStyle='#a78bfa';gc.lineWidth=9;gc.lineCap='round';
+  gc.beginPath();gc.moveTo(px,py);gc.lineTo(ex,ey);gc.stroke();
+  gc.strokeStyle='rgba(255,255,255,0.28)';gc.lineWidth=3;
+  gc.beginPath();gc.moveTo(px,py);gc.lineTo(ex,ey);gc.stroke();
+  gc.fillStyle='#c4b5fd';gc.beginPath();gc.arc(px,py,4,0,Math.PI*2);gc.fill();
+  gc.shadowBlur=0;gc.restore();
+}
+
+function pbEndGame(){
+  pbState='dead';cancelAnimationFrame(pbRaf);
+  if(pbScore>pbBest){pbBest=pbScore;localStorage.setItem('pbBest',pbBest);}
+  pbLB.push(pbScore);pbLB.sort((a,b)=>b-a);pbLB=pbLB.slice(0,5);
+  localStorage.setItem('pbLB',JSON.stringify(pbLB));
+  renderPbLB();updatePBUI();
+  document.getElementById('pbStartBtn').textContent='▶ Launch Cat!';
+  pbDraw();
+}
+
+function renderPbLB(){
+  const ranks=['g','s','b','',''];
+  document.getElementById('pbLb').innerHTML=pbLB.map((s,i)=>
+    `<div class="lb-row"><span class="lb-rank ${ranks[i]}">#${i+1}</span><span>Run ${i+1}</span><span class="lb-pts">${s.toLocaleString()}</span></div>`
+  ).join('')||'<div style="font-size:11px;color:var(--muted)">No scores yet</div>';
+}
+
+// Controls
+document.addEventListener('keydown',e=>{
+  if(e.code==='KeyZ'||e.code==='ArrowLeft'){leftFlip=true;}
+  if(e.code==='Slash'||e.code==='ArrowRight'){rightFlip=true;}
+  if(e.code==='Space'){e.preventDefault();if(pbState!=='playing')pbStart();}
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='KeyZ'||e.code==='ArrowLeft'){leftFlip=false;}
+  if(e.code==='Slash'||e.code==='ArrowRight'){rightFlip=false;}
+});
+pb.addEventListener('touchstart',e=>{
+  const rect=pb.getBoundingClientRect();
+  Array.from(e.touches).forEach(t=>{const x=t.clientX-rect.left;if(x<PBW/2)leftFlip=true;else rightFlip=true;});
+  if(pbState!=='playing')pbStart();
+},{passive:true});
+pb.addEventListener('touchend',()=>{leftFlip=false;rightFlip=false;});
+pb.addEventListener('mousedown',e=>{
+  if(pbState!=='playing'){pbStart();return;}
+  const rect=pb.getBoundingClientRect();
+  if(e.clientX-rect.left<PBW/2)leftFlip=true;else rightFlip=true;
+});
+pb.addEventListener('mouseup',()=>{leftFlip=false;rightFlip=false;});
+let PBW, PBH;
+let pbState = 'idle';
+let pbScore = 0, pbBest = parseInt(localStorage.getItem('pbBest')||'0');
+let pbRaf = null;
+let lives = 3, mult = 1, multTimer = 0;
+let leftFlip = false, rightFlip = false;
+let ballLaunched = false;
+let pbLB = JSON.parse(localStorage.getItem('pbLB')||'[]');
+
+function resizePB() {
+  PBW = pb.offsetWidth || 380;
+  PBH = 520;
+  pb.width = PBW;
+  pb.height = PBH;
+}
+
+// Ball
+let ball = {};
+// Flippers
+let flippers = {};
+// Bumpers
+let bumpers = [];
+// Targets
+let targets = [];
+
+// ══════════════════════════════════════
+// MOTOCAT RIDER (random intervals)
+// ══════════════════════════════════════
+const riderCanvas = document.getElementById('motoRider');
+const rctx = riderCanvas.getContext('2d');
+
+function drawRider(facing=1) {
+  const W=140,H=70;
+  rctx.clearRect(0,0,W,H);
+  rctx.save();
+  if(facing===-1){rctx.translate(W,0);rctx.scale(-1,1);}
+  // Exhaust puff
+  rctx.fillStyle='rgba(247,147,26,0.35)';
+  rctx.beginPath();rctx.arc(10,42,7+Math.random()*5,0,Math.PI*2);rctx.fill();
+  rctx.beginPath();rctx.arc(4,46,4+Math.random()*3,0,Math.PI*2);rctx.fill();
+  // Moto body
+  rctx.fillStyle='#f7931a';
+  rctx.beginPath();rctx.roundRect(22,32,68,18,4);rctx.fill();
+  // Seat
+  rctx.fillStyle='#333';rctx.beginPath();rctx.roundRect(42,26,36,10,3);rctx.fill();
+  // Handlebars
+  rctx.strokeStyle='#666';rctx.lineWidth=3;rctx.lineCap='round';
+  rctx.beginPath();rctx.moveTo(78,28);rctx.lineTo(88,22);rctx.stroke();
+  rctx.beginPath();rctx.moveTo(88,22);rctx.lineTo(88,30);rctx.stroke();
+  // Wheels
+  [30,82].forEach(wx=>{
+    rctx.strokeStyle='#374151';rctx.lineWidth=6;
+    rctx.beginPath();rctx.arc(wx,52,14,0,Math.PI*2);rctx.stroke();
+    rctx.strokeStyle='#6b7280';rctx.lineWidth=2;
+    rctx.beginPath();rctx.arc(wx,52,14,0,Math.PI*2);rctx.stroke();
+    rctx.fillStyle='#9ca3af';rctx.beginPath();rctx.arc(wx,52,5,0,Math.PI*2);rctx.fill();
+  });
+  // Fork
+  rctx.strokeStyle='#888';rctx.lineWidth=3;
+  rctx.beginPath();rctx.moveTo(82,36);rctx.lineTo(82,52);rctx.stroke();
+  rctx.beginPath();rctx.moveTo(78,36);rctx.lineTo(82,52);rctx.stroke();
+  // Cat body (helmet)
+  rctx.fillStyle='#ec4899';
+  rctx.beginPath();rctx.roundRect(50,8,28,24,8);rctx.fill();
+  // Helmet
+  rctx.fillStyle='#f7931a';rctx.beginPath();rctx.roundRect(52,8,24,14,6);rctx.fill();
+  // Visor
+  rctx.fillStyle='#60a5fa';rctx.beginPath();rctx.roundRect(55,12,18,6,3);rctx.fill();
+  // Ears
+  rctx.fillStyle='#ec4899';
+  rctx.beginPath();rctx.moveTo(52,10);rctx.lineTo(47,2);rctx.lineTo(55,8);rctx.closePath();rctx.fill();
+  rctx.beginPath();rctx.moveTo(76,10);rctx.lineTo(81,2);rctx.lineTo(73,8);rctx.closePath();rctx.fill();
+  // Eyes
+  rctx.fillStyle='#fff';rctx.fillRect(55,20,5,5);rctx.fillRect(68,20,5,5);
+  rctx.fillStyle='#1a1a2e';rctx.fillRect(57,21,3,3);rctx.fillRect(70,21,3,3);
+  // Speed lines
+  rctx.strokeStyle='rgba(247,147,26,0.4)';rctx.lineWidth=1.5;
+  [20,26,32].forEach((y,i)=>{
+    rctx.beginPath();rctx.moveTo(-10,y);rctx.lineTo(10-i*3,y);rctx.stroke();
+  });
+  rctx.restore();
+}
+
+let riderActive=false;
+function launchRider(){
+  if(riderActive)return;
+  riderActive=true;
+  const goRight=Math.random()>0.5;
+  riderCanvas.style.animation='none';
+  riderCanvas.style.bottom=Math.floor(60+Math.random()*120)+'px';
+  riderCanvas.style.left=goRight?'-160px':'calc(100vw + 10px)';
+  riderCanvas.style.transform=goRight?'scaleX(1)':'scaleX(-1)';
+  drawRider(goRight?1:-1);
+  // Animate with JS for smooth motion
+  let posX=goRight?-160:window.innerWidth+10;
+  const targetX=goRight?window.innerWidth+160:-160;
+  const spd=(goRight?1:-1)*(4+Math.random()*3);
+  let frame=0;
+  function rideStep(){
+    posX+=spd;
+    riderCanvas.style.left=posX+'px';
+    // Wobble
+    riderCanvas.style.bottom=(parseInt(riderCanvas.style.bottom)+Math.sin(frame*0.3)*0.6)+'px';
+    frame++;
+    drawRider(goRight?1:-1);
+    if((goRight&&posX<targetX)||(!goRight&&posX>targetX)){requestAnimationFrame(rideStep);}
+    else{riderActive=false;}
+  }
+  requestAnimationFrame(rideStep);
+}
+// Random intervals between 8-22 seconds
+function scheduleRider(){
+  setTimeout(()=>{launchRider();scheduleRider();},8000+Math.random()*14000);}
+scheduleRider();
+
+// ══════════════════════════════════════
+// BTC BLOCK MINER GAME
+// ══════════════════════════════════════
+const mc = document.getElementById('minerCanvas');
+const mctx = mc.getContext('2d');
+let MCW, MCH;
+let mMoto=0, mBlocks=0, mHashRate=1, mAutoRate=0;
+let mBlk=[], mParticles=[], mRaf2=null;
+let mRunning=false;
+const UPGRADES=[
+  {name:'GPU Rig',baseCost:50,costMult:2.5,hashBoost:3,autoBoost:0.5,level:0,maxLevel:5},
+  {name:'ASIC Miner',baseCost:200,costMult:3,hashBoost:8,autoBoost:2,level:0,maxLevel:5},
+  {name:'Mining Farm',baseCost:1000,costMult:3.5,hashBoost:25,autoBoost:8,level:0,maxLevel:5},
+  {name:'Satellite Rig',baseCost:5000,costMult:4,hashBoost:80,autoBoost:30,level:0,maxLevel:3},
+];
+
+function resizeMC(){
+  MCW=mc.offsetWidth||500;MCH=400;mc.width=MCW;mc.height=MCH;
+}
+
+function initMiner(){
+  resizeMC();
+  mBlk=[];
+  // Generate initial grid of blocks
+  const cols=5,rows=3,bw=Math.floor((MCW-60)/cols),bh=70;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    mBlk.push({
+      x:30+c*bw,y:30+r*(bh+12),w:bw-8,h:bh,
+      hp:3,maxHp:3,
+      type:['btc','moto','pill','op20','cat'][Math.floor(Math.random()*5)],
+      crack:0,flash:0
+    });
+  }
+  mParticles=[];
+  if(!mRunning){mRunning=true;minerLoop();}
+}
+
+const BLK_COLS={btc:'#f7931a',moto:'#7c3aed',pill:'#10b981',op20:'#3b82f6',cat:'#ec4899'};
+const BLK_LBL={btc:'₿',moto:'M',pill:'P',op20:'OP',cat:'🐱'};
+const BLK_PTS={btc:500,moto:200,pill:100,op20:150,cat:1000};
+
+function minerLoop(){
+  mRaf2=requestAnimationFrame(minerLoop);
+  // Auto-mine
+  if(mAutoRate>0&&Math.random()<mAutoRate/60){
+    const alive=mBlk.filter(b=>b.hp>0);
+    if(alive.length>0){mineBlock(alive[Math.floor(Math.random()*alive.length)],false);}
+  }
+  // Respawn if all dead
+  if(mBlk.every(b=>b.hp<=0)){initMiner();}
+  drawMiner();
+}
+
+function mineBlock(b,click=true){
+  if(b.hp<=0)return;
+  b.hp--; b.crack=1-b.hp/b.maxHp; b.flash=8;
+  // Particles
+  for(let i=0;i<6;i++){
+    mParticles.push({
+      x:b.x+b.w/2,y:b.y+b.h/2,
+      vx:(Math.random()-0.5)*6,vy:(Math.random()-0.7)*7,
+      life:30,col:BLK_COLS[b.type],
+      txt:i===0?'+'+BLK_PTS[b.type]:null
+    });
+  }
+  if(b.hp<=0){
+    const earned=BLK_PTS[b.type]*Math.ceil(mHashRate/5);
+    mMoto+=earned; mBlocks++;
+    document.getElementById('mMined').textContent=mMoto.toLocaleString();
+    document.getElementById('mBlocks').textContent=mBlocks;
+    updateUpgradeUI();
+  }
+}
+
+function drawMiner(){
+  mctx.clearRect(0,0,MCW,MCH);
+  mctx.fillStyle='#02020a';mctx.fillRect(0,0,MCW,MCH);
+  // Grid bg
+  mctx.strokeStyle='rgba(247,147,26,0.04)';
+  for(let x=0;x<MCW;x+=30){mctx.beginPath();mctx.moveTo(x,0);mctx.lineTo(x,MCH);mctx.stroke();}
+  for(let y=0;y<MCH;y+=30){mctx.beginPath();mctx.moveTo(0,y);mctx.lineTo(MCW,y);mctx.stroke();}
+
+  // Blocks
+  mBlk.forEach(b=>{
+    if(b.hp<=0)return;
+    const col=BLK_COLS[b.type];
+    const flash=b.flash>0;
+    mctx.save();
+    mctx.shadowColor=col;mctx.shadowBlur=flash?20:6;
+    mctx.fillStyle=flash?'#fff':col;
+    mctx.beginPath();mctx.roundRect(b.x,b.y,b.w,b.h,8);mctx.fill();
+    // HP bar
+    mctx.fillStyle='rgba(0,0,0,0.5)';mctx.beginPath();mctx.roundRect(b.x+4,b.y+b.h-12,b.w-8,8,3);mctx.fill();
+    mctx.fillStyle='rgba(255,255,255,0.8)';mctx.beginPath();mctx.roundRect(b.x+4,b.y+b.h-12,(b.w-8)*(b.hp/b.maxHp),8,3);mctx.fill();
+    // Cracks
+    if(b.crack>0){
+      mctx.strokeStyle='rgba(0,0,0,0.5)';mctx.lineWidth=1.5;
+      mctx.beginPath();mctx.moveTo(b.x+b.w*0.4,b.y+b.h*0.3);mctx.lineTo(b.x+b.w*0.6,b.y+b.h*0.7);mctx.stroke();
+      if(b.crack>0.5){mctx.beginPath();mctx.moveTo(b.x+b.w*0.5,b.y+b.h*0.2);mctx.lineTo(b.x+b.w*0.3,b.y+b.h*0.8);mctx.stroke();}
+    }
+    // Label
+    mctx.fillStyle=flash?col:'rgba(0,0,0,0.85)';
+    mctx.font=`bold 20px Syne,sans-serif`;mctx.textAlign='center';mctx.textBaseline='middle';
+    mctx.shadowBlur=0;mctx.fillText(BLK_LBL[b.type],b.x+b.w/2,b.y+b.h/2-4);
+    if(b.flash>0)b.flash--;
+    mctx.restore();
+  });
+
+  // Particles
+  mParticles.forEach((p,i)=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.3;p.life--;
+    const a=p.life/30;
+    if(p.txt){
+      mctx.fillStyle=`rgba(255,255,255,${a})`;
+      mctx.font='bold 13px Space Mono,monospace';mctx.textAlign='center';
+      mctx.fillText(p.txt,p.x,p.y);
+    } else {
+      mctx.fillStyle=p.col+Math.floor(a*255).toString(16).padStart(2,'0');
+      mctx.beginPath();mctx.arc(p.x,p.y,3*a,0,Math.PI*2);mctx.fill();
+    }
+  });
+  mParticles=mParticles.filter(p=>p.life>0);
+
+  // Hash rate bar at bottom
+  const hPct=Math.min(mHashRate/500,1);
+  mctx.fillStyle='rgba(255,255,255,0.05)';mctx.fillRect(0,MCH-8,MCW,8);
+  mctx.fillStyle='#f7931a';mctx.fillRect(0,MCH-8,MCW*hPct,8);
+  document.getElementById('mHash').textContent=mHashRate>1000?(mHashRate/1000).toFixed(1)+' KH/s':mHashRate+' H/s';
+  document.getElementById('hashFill').style.width=hPct*100+'%';
+}
+
+mc.addEventListener('click',e=>{
+  const rect=mc.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(MCW/rect.width);
+  const my=(e.clientY-rect.top)*(MCH/rect.height);
+  mBlk.forEach(b=>{
+    if(b.hp>0&&mx>b.x&&mx<b.x+b.w&&my>b.y&&my<b.y+b.h)mineBlock(b,true);
+  });
+  // click burst
+  for(let i=0;i<4;i++)mParticles.push({x:mx,y:my,vx:(Math.random()-0.5)*5,vy:-2-Math.random()*3,life:20,col:'#f7931a',txt:i===0?'⛏️':null});
+});
+mc.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  const rect=mc.getBoundingClientRect();
+  Array.from(e.touches).forEach(t=>{
+    const mx=(t.clientX-rect.left)*(MCW/rect.width);
+    const my=(t.clientY-rect.top)*(MCH/rect.height);
+    mBlk.forEach(b=>{if(b.hp>0&&mx>b.x&&mx<b.x+b.w&&my>b.y&&my<b.y+b.h)mineBlock(b,true);});
+  });
+},{passive:false});
+
+function buyUpgrade(idx){
+  const u=UPGRADES[idx];
+  const cost=Math.floor(u.baseCost*Math.pow(u.costMult,u.level));
+  if(mMoto<cost||u.level>=u.maxLevel)return;
+  mMoto-=cost; u.level++;
+  mHashRate+=u.hashBoost; mAutoRate+=u.autoBoost;
+  document.getElementById('mMined').textContent=mMoto.toLocaleString();
+  toast(`⚡ ${u.name} upgraded to Lv${u.level}!`,'success');
+  updateUpgradeUI();
+}
+
+function updateUpgradeUI(){
+  UPGRADES.forEach((u,i)=>{
+    const cost=Math.floor(u.baseCost*Math.pow(u.costMult,u.level));
+    const btn=document.getElementById('upg'+i);
+    const costEl=document.getElementById('upg'+i+'cost');
+    if(btn){
+      btn.disabled=(mMoto<cost||u.level>=u.maxLevel);
+      if(costEl)costEl.textContent=u.level>=u.maxLevel?'MAX':cost.toLocaleString()+' MOTO';
+      btn.querySelector('span').textContent=(u.level>0?'★'.repeat(u.level)+' ':'')+u.name;
+    }
+  });
+}
+
+function resetMiner(){
+  UPGRADES.forEach(u=>{u.level=0;});
+  mMoto=0;mBlocks=0;mHashRate=1;mAutoRate=0;
+  document.getElementById('mMined').textContent='0';
+  document.getElementById('mBlocks').textContent='0';
+  updateUpgradeUI();initMiner();
+}
+
+// ══════════════════════════════════════
+// FAKE LIVE TX TICKER
+// ══════════════════════════════════════
+const addrPool=['bcrt1p...a1f2','bcrt1q...9c3d','bcrt1p...7e88','bcrt1q...2b14','bcrt1p...ff01'];
+const tokPairs=['rBTC→MOTO','MOTO→PILL','PILL→rBTC','WBTC→rBTC','rBTC→WBTC','MOTO→rBTC'];
+const amts=['0.001 rBTC','420 MOTO','1,200 PILL','0.0042 rBTC','890 MOTO'];
+let txTick=0;
+setInterval(()=>{
+  txTick++;
+  const txs=document.getElementById('recentTxs');
+  if(!txs) return;
+  const div=document.createElement('div');
+  div.className='tx-item';
+  const isIn=Math.random()>0.4;
+  div.innerHTML=`<div class="tx-dot" style="background:${isIn?'var(--green)':'var(--moto)'}"></div><div class="tx-addr">${addrPool[txTick%5]}</div><div class="tx-amt">${amts[txTick%5]}</div><div class="tx-time">just now</div>`;
+  txs.insertBefore(div,txs.firstChild);
+  if(txs.children.length>6) txs.removeChild(txs.lastChild);
+  // Update ages
+  Array.from(txs.querySelectorAll('.tx-time')).forEach((t,i)=>{
+    if(i>0) t.textContent=['5s ago','15s ago','30s ago','1m ago','2m ago'][i-1]||'2m+ ago';
+  });
+},7000);
+
+// ══════════════════════════════════════
+// QUOTES TICKER
+// ══════════════════════════════════════
+const QUOTES = [
+  {text:"Bitcoin finally has the DeFi layer it always deserved. OP_NET changes everything.", author:"@cryptonaut_btc", tag:"Community"},
+  {text:"MotoSwap is the first true AMM on Bitcoin L1 — no bridges, no wrapping, pure Bitcoin.", author:"@defi_maxi", tag:"MotoSwap"},
+  {text:"Staking my MotoCats and earning real yield directly on Bitcoin. This is the future.", author:"@nft_rider99", tag:"MotoCats"},
+  {text:"OP_20 tokens on Bitcoin L1 are a paradigm shift. AssemblyScript smart contracts are live.", author:"@buildonbtc", tag:"Dev"},
+  {text:"The MotoSwap liquidity pools are growing fast. 38% APY with real Bitcoin security beneath.", author:"@yield_farmer_btc", tag:"DeFi"},
+  {text:"No more ETH gas wars. OP_NET brings DeFi home — to Bitcoin, where it belongs.", author:"@satoshi_descendent", tag:"Community"},
+  {text:"MotoCats NFTs with on-chain utility and real yield. Finally an NFT project that delivers.", author:"@nft_defi_degen", tag:"MotoCats"},
+  {text:"OP_NET's cryptographic proof system means every transaction is verifiable on Bitcoin's chain.", author:"@btc_security_nerd", tag:"Tech"},
+  {text:"The $MOTO token ecosystem is one of the most thoughtfully designed tokenomics in Bitcoin DeFi.", author:"@tokenomics_pro", tag:"MOTO"},
+  {text:"MotoChef farming rewards with Bitcoin-level security? That's not DeFi — that's DeFi done right.", author:"@chef_btc", tag:"Farm"},
+  {text:"Building on OP_NET feels like building on Ethereum circa 2020 — except it's Bitcoin.", author:"@dev_on_btc", tag:"Dev"},
+  {text:"The OP_WALLET extension makes interacting with Bitcoin smart contracts as easy as MetaMask.", author:"@ux_defi", tag:"Wallet"},
+  {text:"DeFiBible is the resource the Bitcoin DeFi ecosystem needed. Everything in one place.", author:"@knowledge_seeker", tag:"Docs"},
+  {text:"Cross-chain is overrated. Native Bitcoin DeFi with OP_NET is the real endgame.", author:"@btc_maximalist_defi", tag:"Community"},
+  {text:"Swapping OP_20 tokens on MotoSwap with 0.3% fees and Bitcoin finality. No compromise.", author:"@low_fee_trader", tag:"MotoSwap"},
+];
+
+function buildQuotes() {
+  const track = document.getElementById('quoteTrack');
+  if(!track) return;
+  // Double for seamless loop
+  const all = [...QUOTES, ...QUOTES];
+  track.innerHTML = all.map(q => `
+    <div class="quote-card">
+      <div class="quote-text">${q.text}</div>
+      <div class="quote-author"><em>${q.author}</em> · ${q.tag}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('resize',()=>{resizePB();if(pbState==='idle')pbDraw();resizeMC();});
+fetchPrices();
+setInterval(fetchPrices, 60000);
+loadBtcChart('7');
+pbInit();
+pbDraw();
+renderPbLB();
+buildQuotes();
+resizeMC();
+initMiner();
+updateUpgradeUI();
+</script>
+</body>
+</html>
